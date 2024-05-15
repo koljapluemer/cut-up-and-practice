@@ -5,6 +5,10 @@ song-2/
 last_folder.json
 feeedback/
 feeedback/*
+assets/example/
+assets/example/*
+feedback/song-testing.json
+feedback/song-2.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -175,6 +175,8 @@ class ImageSnippetApp:
             self.display_snippet_images(self.current_snippet, self.main_footer_rating_frame, True)
 
         if self.snippets:
+            # load the feedback file
+
             self.last_snippet = self.current_snippet
             self.last_snippet_name = self.current_snippet_name
             # find random new one
