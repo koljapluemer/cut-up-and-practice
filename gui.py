@@ -71,7 +71,7 @@ class ImageSnippetApp:
         self.difficulty_levels = ["Very Hard", "Hard", "Medium", "Easy", "Very Easy"]
         self.difficulty_buttons = []
         for level in self.difficulty_levels:
-            button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l))
+            button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.current_snippet_name))
             button.pack(side=tk.LEFT, padx=5)
 
         # Main Screen Footer 
@@ -92,9 +92,18 @@ class ImageSnippetApp:
         self.main_footer_rating_label = tk.Label(self.main_footer_rating_frame, text="Rate the difficulty of the last snippet:")
         self.main_footer_rating_label.pack()
 
+        self.main_footer_rating_buttons_frame = tk.Frame(self.main_footer_rating_frame)
+
+        for level in self.difficulty_levels:
+            button = tk.Button(self.main_footer_rating_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.last_snippet_name))
+            button.pack(side=tk.LEFT, padx=5)
+
+        self.main_footer_rating_buttons_frame.pack(pady=10, side=tk.BOTTOM)
+
         self.main_footer_rating_frame = tk.Frame(self.main_footer_rating_frame)
         self.main_footer_rating_frame.pack()
 
+ 
     def load_last_folder_path(self):
         try:
             with open("last_folder.json", "r") as file:
@@ -184,11 +193,11 @@ class ImageSnippetApp:
             label.pack(side=tk.LEFT, padx=5)
                 
 
-    def set_difficulty(self, level):
-        self.store_feedback(level)
+    def set_difficulty(self, level, snippet_name):
+        self.store_feedback(level, snippet_name)
 
 
-    def store_feedback(self, difficulty_level):
+    def store_feedback(self, difficulty_level, snippet_name):
         if self.last_folder_path:
             folder_name = os.path.basename(self.last_folder_path)
             safe_folder_name = re.sub(r'[^\w\s-]', '', folder_name)
@@ -209,11 +218,11 @@ class ImageSnippetApp:
             else:
                 data = []
 
-            image_feedback = next((item for item in data if self.current_snippet_name in item), None)
+            image_feedback = next((item for item in data if snippet_name in item), None)
             if image_feedback is not None:
-                image_feedback[self.current_snippet_name].append(feedback_data)
+                image_feedback[snippet_name].append(feedback_data)
             else:
-                image_feedback = {self.current_snippet_name: [feedback_data]}
+                image_feedback = {snippet_name: [feedback_data]}
                 data.append(image_feedback)
 
             with open(json_path, "w") as file:
