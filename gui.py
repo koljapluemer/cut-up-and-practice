@@ -101,19 +101,18 @@ class ImageSnippetApp:
         if self.current_image:
             self.current_image.pack_forget()
 
-        if self.image_index < len(self.image_list):
-            logging.info(f'Showing image {self.image_index + 1}')
-            image = self.image_list[self.image_index]
+        if self.image_list:
+            logging.info('Showing next random image')
+            image = random.choice(self.image_list)
             tk_image = self.convert_to_tkimage(image)
             self.current_image = tk.Label(self.main_frame, image=tk_image)
             self.current_image.image = tk_image  # Store a reference to the image
             logging.info(f'Image size: {image.size}')
             self.current_image.pack(pady=20)
 
-            self.image_index += 1
-            self.master.after(30000, self.show_next_image)
+            self.master.after(3000, self.show_next_image)
         else:
-            self.back_to_start_screen()
+            logging.warning('No image to display.')
 
     def back_to_start_screen(self):
         self.main_frame.pack_forget()
