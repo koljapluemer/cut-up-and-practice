@@ -87,19 +87,19 @@ class ImageSnippetApp:
             if self.image_list:
                 self.last_folder_path = folder_path
                 self.save_last_folder_path(self.last_folder_path)
-                self.start_main_screen()
+                self.open_session_settings()
 
     def load_last_snippet_collection(self):
         if self.last_folder_path:
             self.image_list = self.load_images_from_folder(self.last_folder_path)
             if self.image_list:
-                self.start_main_screen()
+                self.open_session_settings()
 
     def load_example(self):
         example_folder = os.path.join("assets", "example", "song-1")
         self.image_list = self.load_images_from_folder(example_folder)
         if self.image_list:
-            self.start_main_screen()
+            self.open_session_settings()
 
     def load_images_from_folder(self, folder_path):
         image_list = []
@@ -124,8 +124,7 @@ class ImageSnippetApp:
             logging.info(f'Image size: {image.size}')
             self.current_image.pack(pady=20)
 
-
-            self.master.after(30000, self.show_next_image)
+            self.master.after(int(self.next_snippet_duration) * 1000, self.show_next_image)
         else:
             logging.warning('No image to display.')
             
@@ -168,6 +167,35 @@ class ImageSnippetApp:
 
             with open(json_path, "w") as file:
                 json.dump(data, file)
+
+    # Sessions Settings Screen
+    def open_session_settings(self):
+        # Forget any existing frames to ensure only settings frame is visible
+        self.start_frame.pack_forget()
+        self.main_frame.pack_forget()
+
+        # Create the settings frame
+        self.settings_frame = tk.Frame(self.master)
+        self.settings_frame.pack()
+
+        # Add widgets for session settings
+        duration_label = tk.Label(self.settings_frame, text="Duration each snippet is shown (seconds):")
+        duration_label.pack(pady=5)
+
+        self.next_snippet_duration = tk.IntVar()
+        self.next_snippet_duration.set(5)
+        duration_entry = tk.Entry(self.settings_frame, textvariable=self.next_snippet_duration)
+        duration_entry.pack(pady=5)
+
+        back_button = tk.Button(self.settings_frame, text="Start", command=self.save_settings_and_redirect)
+        back_button.pack(pady=10)
+
+    def save_settings_and_redirect(self):
+        # delete the settings frame
+        self.settings_frame.pack_forget()
+        self.next_snippet_duration = self.next_snippet_duration.get()
+        self.start_main_screen()
+
 
 def main():
     root = tk.Tk()

@@ -7,3 +7,5 @@
 
 
 - make it possible to give feedback on the previous section
+- glueing together possibilty
+- SR or something
