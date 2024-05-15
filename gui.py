@@ -13,7 +13,7 @@ class ImageSnippetApp:
         logging.info('Init')
         self.master = master
         self.master.title("Image Snippets App")
-        self.master.geometry("400x300")
+        self.master.geometry("1000x800")
 
         self.start_frame = tk.Frame(self.master)
         self.start_frame.pack()
@@ -26,26 +26,36 @@ class ImageSnippetApp:
         self.options_menu = tk.Menu(self.master)
         self.master.config(menu=self.options_menu)
 
-        self.last_folder_path = None
-        self.load_last_folder_path()
-
-        if self.last_folder_path:
-            self.load_last_button = tk.Button(self.start_frame, text="Load Last Snippet Collection", command=self.load_last_snippet_collection)
-            self.load_last_button.pack(pady=10)
+        self.load_last_button = tk.Button(self.start_frame, text="Load Last Snippet Collection", command=self.load_last_snippet_collection)
+        self.load_last_button.pack(pady=10)
 
         self.open_folder_button = tk.Button(self.start_frame, text="Open Folder", command=self.open_folder)
         self.open_folder_button.pack(pady=10)
 
-  
-
         self.load_example_button = tk.Button(self.start_frame, text="Load Example", command=self.load_example)
         self.load_example_button.pack(pady=10)
+
+        self.current_image_frame = tk.Frame(self.main_frame)
+        self.current_image_frame.pack(pady=20)
+
+        self.current_image_label = tk.Label(self.current_image_frame)
+        self.current_image_label.pack()
+
+        self.difficulty_buttons_frame = tk.Frame(self.main_frame)
+        self.difficulty_buttons_frame.pack()
+
+        self.difficulty_levels = ["Very Hard", "Hard", "Medium", "Easy", "Very Easy"]
+        self.difficulty_buttons = []
+        for level in self.difficulty_levels:
+            button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l))
+            button.pack(side=tk.LEFT, padx=5)
 
         self.current_image = None
         self.image_index = 0
         self.image_list = []
 
-
+        self.last_folder_path = None
+        self.load_last_folder_path()
 
     def load_last_folder_path(self):
         try:
@@ -99,25 +109,22 @@ class ImageSnippetApp:
 
     def show_next_image(self):
         if self.current_image:
-            self.current_image.pack_forget()
+            self.current_image_label.pack_forget()
 
-        if self.image_list:
-            logging.info('Showing next random image')
-            image = random.choice(self.image_list)
+        if self.image_index < len(self.image_list):
+            logging.info(f'Showing image {self.image_index + 1}')
+            image = self.image_list[self.image_index]
             tk_image = self.convert_to_tkimage(image)
-            self.current_image = tk.Label(self.main_frame, image=tk_image)
-            self.current_image.image = tk_image  # Store a reference to the image
-            logging.info(f'Image size: {image.size}')
-            self.current_image.pack(pady=20)
+            self.current_image = ImageTk.PhotoImage(image)
+            self.current_image_label.config(image=self.current_image)
+            self.current_image_label.pack(pady=10)
 
-            self.master.after(3000, self.show_next_image)
+            self.image_index += 1
         else:
-            logging.warning('No image to display.')
+            logging.warning('No more images to display.')
 
-    def back_to_start_screen(self):
-        self.main_frame.pack_forget()
-        self.image_index = 0
-        self.start_frame.pack()
+    def set_difficulty(self, level):
+        logging.info(f'Setting difficulty level to: {level}')
 
     def convert_to_tkimage(self, image):
         return ImageTk.PhotoImage(image)
