@@ -1,0 +1,51 @@
+[
+  {
+    "'10.png'\u2014'27.png'": [
+      { "timestamp": "2024-05-15T13:37:19.082497", "difficulty_level": "Easy" },
+      { "timestamp": "2024-05-15T13:37:19.245747", "difficulty_level": "Easy" },
+      { "timestamp": "2024-05-15T13:37:19.379678", "difficulty_level": "Easy" },
+      { "timestamp": "2024-05-15T13:37:19.528575", "difficulty_level": "Easy" },
+      { "timestamp": "2024-05-15T13:37:19.677053", "difficulty_level": "Easy" },
+      { "timestamp": "2024-05-15T13:37:19.840603", "difficulty_level": "Easy" }
+    ]
+  },
+  {
+    "'36.png'": [
+      { "timestamp": "2024-05-15T13:37:34.014899", "difficulty_level": "Hard" },
+      {
+        "timestamp": "2024-05-15T13:37:34.371245",
+        "difficulty_level": "Medium"
+      }
+    ]
+  },
+  {
+    "'9.png'": [
+      { "timestamp": "2024-05-15T13:38:27.602723", "difficulty_level": "Hard" },
+      {
+        "timestamp": "2024-05-15T13:38:27.966488",
+        "difficulty_level": "Medium"
+      },
+      {
+        "timestamp": "2024-05-15T13:38:28.391243",
+        "difficulty_level": "Medium"
+      },
+      { "timestamp": "2024-05-15T13:38:28.793030", "difficulty_level": "Easy" }
+    ]
+  },
+  {
+    "'21.png'\u2014'34.png'": [
+      {
+        "timestamp": "2024-05-15T13:38:36.307298",
+        "difficulty_level": "Medium"
+      }
+    ]
+  },
+  {
+    "'23.png'\u2014'7.png'": [
+      {
+        "timestamp": "2024-05-15T13:38:41.455660",
+        "difficulty_level": "Medium"
+      }
+    ]
+  }
+]

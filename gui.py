@@ -11,8 +11,6 @@ import logging
 
 class ImageSnippetApp:
     def __init__(self, master):
-        logging.basicConfig(level=logging.INFO)
-        logging.info('Init')
         self.master = master
         self.master.title("Image Snippets App")
         self.master.geometry("1000x800")
@@ -75,7 +73,6 @@ class ImageSnippetApp:
             json.dump(data, file)
 
     def start_main_screen(self):
-        logging.info('Starting Main Loop')
         self.start_frame.pack_forget()
         self.main_frame.pack()
 
@@ -116,12 +113,13 @@ class ImageSnippetApp:
             if not self.current_image_frame:
                 self.current_image_frame = tk.Frame(self.main_frame)
                 self.current_image_frame.pack()
-            logging.info('Loading next random snippet')
             random_snippet = random.choice(self.snippets)
             # Clear existing images before displaying new ones
             self.clear_current_image_frame()
             self.display_snippet_images(random_snippet)
             self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
+            # save current snippet name: all image names, made filename safe, connected by —
+            self.current_snippet_name = '—'.join([f'\'{image.filename.split("/")[-1]}\'' for image in random_snippet])
         else:
             logging.warning('No snippets available.')
 
@@ -129,7 +127,6 @@ class ImageSnippetApp:
     def clear_current_image_frame(self):
         # Check if current_image_frame exists and contains widgets
         if self.current_image_frame and self.current_image_frame.winfo_children():
-            logging.info('Clearing current image frame')
             # Destroy all child widgets in current_image_frame
             for widget in self.current_image_frame.winfo_children():
                 widget.destroy()
@@ -137,7 +134,6 @@ class ImageSnippetApp:
 
     def display_snippet_images(self, snippet):
         for image_path in snippet:
-            logging.info(f'Displaying image: {image_path}')
 
             tk_image = self.convert_to_tkimage(image_path)
             label = tk.Label(self.current_image_frame, image=tk_image)
@@ -147,7 +143,6 @@ class ImageSnippetApp:
                 
 
     def set_difficulty(self, level):
-        logging.info(f'Setting difficulty level to: {level}')
         self.store_feedback(level)
 
     def convert_to_tkimage(self, image):
@@ -237,9 +232,6 @@ class ImageSnippetApp:
                 self.snippets.append([self.image_list[i], self.image_list[(i+1) % len(self.image_list)]])
             # append the last snippet
             self.snippets.append([self.image_list[-1], self.image_list[0]])
-            logging.info(f'Generated {len(self.snippets)} snippet combinations: \n{self.snippets}')
-
-
 
 
 def main():
@@ -249,3 +241,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
