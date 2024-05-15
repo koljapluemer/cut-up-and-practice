@@ -25,8 +25,8 @@ class ImageSnippetApp:
         self.options_menu = tk.Menu(self.master)
         self.master.config(menu=self.options_menu)
 
-        self.open_images_button = tk.Button(self.start_frame, text="Open Image Snippets", command=self.open_images)
-        self.open_images_button.pack(pady=10)
+        self.open_folder_button = tk.Button(self.start_frame, text="Open Folder", command=self.open_folder)
+        self.open_folder_button.pack(pady=10)
 
         self.load_example_button = tk.Button(self.start_frame, text="Load Example", command=self.load_example)
         self.load_example_button.pack(pady=10)
@@ -42,16 +42,29 @@ class ImageSnippetApp:
 
         self.show_next_image()
 
-    def open_images(self):
-        file_paths = filedialog.askopenfilenames(title="Select Images", filetypes=[("Image files", "*.png *.jpg *.jpeg")])
-        self.image_list = [Image.open(path) for path in file_paths]
+    def open_folder(self):
+        folder_path = filedialog.askdirectory(title="Select Folder")
+        if folder_path:
+            logging.info(f'Selected folder: {folder_path}')
+            self.image_list = self.load_images_from_folder(folder_path)
+            logging.info(f'Loaded {len(self.image_list)} images')
+            if self.image_list:
+                self.start_main_screen()
 
     def load_example(self):
         example_folder = os.path.join("assets", "example", "song-1")
-        file_paths = [os.path.join(example_folder, file) for file in os.listdir(example_folder)]
-        self.image_list = [Image.open(path) for path in file_paths]
+        self.image_list = self.load_images_from_folder(example_folder)
+        if self.image_list:
+            self.start_main_screen()
 
-        self.start_main_screen()
+    def load_images_from_folder(self, folder_path):
+        image_list = []
+        for filename in os.listdir(folder_path):
+            filepath = os.path.join(folder_path, filename)
+            if os.path.isfile(filepath) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                image = Image.open(filepath)
+                image_list.append(image)
+        return image_list
 
     def show_next_image(self):
         if self.current_image:
