@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import PhotoImage
 from tkinter import filedialog
 import os
 import random
@@ -36,8 +37,13 @@ class ImageSnippetApp:
 
         # Main Screen Setup
 
+        self.current_snippet = None
         self.current_snippet_frame = None
         self.current_snippet_name = None
+
+        self.last_snippet = None
+        self.last_snippet_name = None
+
         self.image_list = []
         self.snippets = []
         
@@ -86,6 +92,9 @@ class ImageSnippetApp:
         self.main_footer_rating_label = tk.Label(self.main_footer_rating_frame, text="Rate the difficulty of the last snippet:")
         self.main_footer_rating_label.pack()
 
+        self.main_footer_rating_frame = tk.Frame(self.main_footer_rating_frame)
+        self.main_footer_rating_frame.pack()
+
     def load_last_folder_path(self):
         try:
             with open("last_folder.json", "r") as file:
@@ -131,36 +140,45 @@ class ImageSnippetApp:
         for filename in os.listdir(folder_path):
             filepath = os.path.join(folder_path, filename)
             if os.path.isfile(filepath) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                image = Image.open(filepath)
-                image_list.append(image)
+                image_list.append(filepath)
         return image_list
 
     def load_next_snippet(self):
+        # if we have a current snippet, clone it to the bottom section (main_footer_rating_frame)
+        if self.current_snippet:
+            self.clear_frame(self.main_footer_rating_frame)
+            self.display_snippet_images(self.current_snippet, self.main_footer_rating_frame, True)
+
         if self.snippets:
+            self.last_snippet = self.current_snippet
+            self.last_snippet_name = self.current_snippet_name
+            # find random new one
             random_snippet = random.choice(self.snippets)
-            # Clear existing images before displaying new ones
-            self.clear_current_snippet_frame()
-            self.display_snippet_images(random_snippet)
+            self.clear_frame(self.current_snippet_frame)
+            self.display_snippet_images(random_snippet, self.current_snippet_frame)
             self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
             # save current snippet name: all image names, made filename safe, connected by —
-            self.current_snippet_name = '—'.join([f'\'{image.filename.split("/")[-1]}\'' for image in random_snippet])
+            self.current_snippet_name = '—'.join([f'\'{image.split("/")[-1]}\'' for image in random_snippet])
+            self.current_snippet = random_snippet
         else:
             logging.warning('No snippets available.')
 
 
-    def clear_current_snippet_frame(self):
+    def clear_frame(self, frame):
         # Check if current_snippet_frame exists and contains widgets
-        if self.current_snippet_frame and self.current_snippet_frame.winfo_children():
+        if frame:
             # Destroy all child widgets in current_snippet_frame
-            for widget in self.current_snippet_frame.winfo_children():
+            for widget in frame.winfo_children():
                 widget.destroy()
 
 
-    def display_snippet_images(self, snippet):
+    def display_snippet_images(self, snippet, target, use_small_images=False):
         for image_path in snippet:
-
-            tk_image = self.convert_to_tkimage(image_path)
-            label = tk.Label(self.current_snippet_frame, image=tk_image)
+            image = Image.open(image_path)
+            if use_small_images:
+                image.thumbnail((100, 100))
+            tk_image = ImageTk.PhotoImage(image)
+            label = tk.Label(target, image=tk_image)
             label.image = tk_image
             # put in frame
             label.pack(side=tk.LEFT, padx=5)
@@ -168,9 +186,6 @@ class ImageSnippetApp:
 
     def set_difficulty(self, level):
         self.store_feedback(level)
-
-    def convert_to_tkimage(self, image):
-        return ImageTk.PhotoImage(image)
 
 
     def store_feedback(self, difficulty_level):
@@ -252,7 +267,7 @@ class ImageSnippetApp:
             # generate pairs, in order
             # e.g. if we have snippets: 1.png, 2.png, 3.png
             # ...generate 1-2, 2-3, 3-1 and no more
-            sorted_image_list = sorted(self.image_list, key=lambda x: x.filename)
+            sorted_image_list = sorted(self.image_list)
             for i in range(len(sorted_image_list)):
                 self.snippets.append([sorted_image_list[i], sorted_image_list[(i+1) % len(sorted_image_list)]])
             # append the last snippet combi
