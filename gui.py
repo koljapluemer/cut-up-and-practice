@@ -228,10 +228,11 @@ class ImageSnippetApp:
             # generate pairs, in order
             # e.g. if we have snippets: 1.png, 2.png, 3.png
             # ...generate 1-2, 2-3, 3-1 and no more
-            for i in range(len(self.image_list)):
-                self.snippets.append([self.image_list[i], self.image_list[(i+1) % len(self.image_list)]])
-            # append the last snippet
-            self.snippets.append([self.image_list[-1], self.image_list[0]])
+            sorted_image_list = sorted(self.image_list, key=lambda x: x.filename)
+            for i in range(len(sorted_image_list)):
+                self.snippets.append([sorted_image_list[i], sorted_image_list[(i+1) % len(sorted_image_list)]])
+            # append the last snippet combi
+            self.snippets.append([sorted_image_list[-1], sorted_image_list[0]])
 
 
 def main():
