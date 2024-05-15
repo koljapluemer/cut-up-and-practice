@@ -1,6 +1,8 @@
 song-1/
 song-1/*
 last_folder.json
+feeedback/
+feeedback/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

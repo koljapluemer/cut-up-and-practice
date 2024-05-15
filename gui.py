@@ -4,6 +4,8 @@ import os
 import random
 import json
 from PIL import Image, ImageTk
+import re
+from datetime import datetime
 
 import logging
 
@@ -51,8 +53,9 @@ class ImageSnippetApp:
             button.pack(side=tk.LEFT, padx=5)
 
         self.current_image = None
-        self.image_index = 0
+        self.current_image_name = None
         self.image_list = []
+        
 
         self.last_folder_path = None
         self.load_last_folder_path()
@@ -109,25 +112,62 @@ class ImageSnippetApp:
 
     def show_next_image(self):
         if self.current_image:
-            self.current_image_label.pack_forget()
+            self.current_image.pack_forget()
 
-        if self.image_index < len(self.image_list):
-            logging.info(f'Showing image {self.image_index + 1}')
-            image = self.image_list[self.image_index]
+        if self.image_list:
+            logging.info('Showing next random image')
+            image = random.choice(self.image_list)
+            self.current_image_name = os.path.basename(image.filename)
             tk_image = self.convert_to_tkimage(image)
-            self.current_image = ImageTk.PhotoImage(image)
-            self.current_image_label.config(image=self.current_image)
-            self.current_image_label.pack(pady=10)
+            self.current_image = tk.Label(self.main_frame, image=tk_image)
+            self.current_image.image = tk_image  # Store a reference to the image
+            logging.info(f'Image size: {image.size}')
+            self.current_image.pack(pady=20)
 
-            self.image_index += 1
+
+            self.master.after(30000, self.show_next_image)
         else:
-            logging.warning('No more images to display.')
+            logging.warning('No image to display.')
+            
 
     def set_difficulty(self, level):
         logging.info(f'Setting difficulty level to: {level}')
+        self.store_feedback(level)
 
     def convert_to_tkimage(self, image):
         return ImageTk.PhotoImage(image)
+
+
+    def store_feedback(self, difficulty_level):
+        if self.last_folder_path:
+            folder_name = os.path.basename(self.last_folder_path)
+            safe_folder_name = re.sub(r'[^\w\s-]', '', folder_name)
+            json_filename = f"{safe_folder_name}.json"
+            json_path = os.path.join("feedback", json_filename)
+
+            feedback_data = {
+                "timestamp": datetime.now().isoformat(),
+                "difficulty_level": difficulty_level
+            }
+
+            if not os.path.exists("feedback"):
+                os.makedirs("feedback")
+
+            if os.path.exists(json_path):
+                with open(json_path, "r") as file:
+                    data = json.load(file)
+            else:
+                data = []
+
+            image_feedback = next((item for item in data if self.current_image_name in item), None)
+            if image_feedback is not None:
+                image_feedback[self.current_image_name].append(feedback_data)
+            else:
+                image_feedback = {self.current_image_name: [feedback_data]}
+                data.append(image_feedback)
+
+            with open(json_path, "w") as file:
+                json.dump(data, file)
 
 def main():
     root = tk.Tk()
