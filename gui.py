@@ -4,8 +4,12 @@ import os
 import random
 from PIL import Image, ImageTk
 
+import logging
+
 class ImageSnippetApp:
     def __init__(self, master):
+        logging.basicConfig(level=logging.INFO)
+        logging.info('Init')
         self.master = master
         self.master.title("Image Snippets App")
         self.master.geometry("400x300")
@@ -32,6 +36,7 @@ class ImageSnippetApp:
         self.image_list = []
 
     def start_main_screen(self):
+        logging.info('Starting Main Loop')
         self.start_frame.pack_forget()
         self.main_frame.pack()
 
@@ -53,9 +58,10 @@ class ImageSnippetApp:
             self.current_image.pack_forget()
 
         if self.image_index < len(self.image_list):
-            
+            logging.info(f'Showing image {self.image_index + 1}')
             image = self.image_list[self.image_index]
             self.current_image = tk.Label(self.main_frame, image=self.convert_to_tkimage(image))
+            logging.info(f'Image size: {image.size}')
             self.current_image.pack(pady=20)
 
             self.image_index += 1
