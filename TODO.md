@@ -9,3 +9,4 @@
 - make it possible to give feedback on the previous section
 - SR or something
 - overview with last practiced songs, stats, progress :)
+- tool for cutting up stuff (but not needed for me yet...)

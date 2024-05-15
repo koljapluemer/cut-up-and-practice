@@ -12,12 +12,15 @@ import logging
 
 class ImageSnippetApp:
     def __init__(self, master):
+
+
+
+
         self.master = master
         self.master.title("Image Snippets App")
         self.master.geometry("1000x800")
 
         self.start_frame = tk.Frame(self.master)
-        self.start_frame.pack()
 
         self.label = tk.Label(self.start_frame, text="Let's Cut Up Some Music", font=("Helvetica", 16))
         self.label.pack(pady=10)
@@ -28,13 +31,18 @@ class ImageSnippetApp:
         self.start_menu_frame = tk.Frame(self.start_frame, borderwidth=2, relief="groove", padx=10, pady=10)
         self.start_menu_frame.pack()
 
-        self.load_last_button = tk.Button(self.start_menu_frame, text="Load Last Snippet Collection", command=self.load_last_snippet_collection)
-        self.load_last_button.pack(pady=5, expand=True, fill=tk.X)
+        self.start_menu_label = tk.Label(self.start_menu_frame, text="Practice Mode:")
+        self.start_menu_label.pack()
 
-        self.open_folder_button = tk.Button(self.start_menu_frame, text="Open Folder", command=self.open_folder)
+        self.last_folder_path = None
+        self.load_last_folder_path()
+
+        self.load_last_button = tk.Button(self.start_menu_frame, text="Continue Last Practice", command=self.load_last_snippet_collection, bg="#c0dbf1")
+
+        self.open_folder_button = tk.Button(self.start_menu_frame, text="Load Snippets from Local Folder", command=self.open_folder)
         self.open_folder_button.pack(pady=5, expand=True, fill=tk.X)
 
-        self.load_example_button = tk.Button(self.start_menu_frame, text="Load Example", command=self.load_example)
+        self.load_example_button = tk.Button(self.start_menu_frame, text="Load Example Snippets", command=self.load_example)
         self.load_example_button.pack(pady=5, expand=True, fill=tk.X)
 
         # Main Screen Setup
@@ -50,23 +58,20 @@ class ImageSnippetApp:
         self.snippets = []
         
 
-        self.last_folder_path = None
-        self.load_last_folder_path()
-
         self.main_frame = tk.Frame(self.master, padx=10, pady=10)
 
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.rowconfigure(0, weight=5)
-        self.main_frame.rowconfigure(1, weight=100)
+        self.main_frame.rowconfigure(1, weight=1)
 
         self.main_practice_frame = tk.Frame(self.main_frame, bg="white", borderwidth=2, relief="groove", padx=10, pady=10)
-        self.main_practice_frame.grid(row=0, column=0, sticky="ew")
+        self.main_practice_frame.grid(row=0, column=0, sticky="ewns")
 
-        self.main_heading = tk.Label(self.main_practice_frame, text="Practice:", font=("Helvetica", 16), bg="white")
+        self.main_heading = tk.Label(self.main_practice_frame, text="Practice:", font=("Helvetica", 28), bg="white")
         self.main_heading.pack(pady=10)
 
         self.current_snippet_frame = tk.Frame(self.main_practice_frame, bg="white")
-        self.current_snippet_frame.pack(pady=10, padx=10)
+        self.current_snippet_frame.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
         self.current_snippet_label = tk.Label(self.current_snippet_frame, bg="white")
         self.current_snippet_label.pack()
@@ -77,7 +82,7 @@ class ImageSnippetApp:
         self.difficulty_levels = ["Very Hard", "Hard", "Medium", "Easy", "Very Easy"]
         self.difficulty_buttons = []
         for level in self.difficulty_levels:
-            button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.current_snippet_name))
+            button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.current_snippet_name), font=("Helvetica", 12), height="2", bg="#c0dbf1")
             button.pack(side=tk.LEFT, padx=5)
 
         # Main Screen Footer 
@@ -109,6 +114,10 @@ class ImageSnippetApp:
         self.main_footer_rating_frame = tk.Frame(self.main_footer_rating_frame)
         self.main_footer_rating_frame.pack()
 
+        self.start_start_screen()
+
+
+
  
     def load_last_folder_path(self):
         try:
@@ -119,6 +128,7 @@ class ImageSnippetApp:
             pass
 
     def save_last_folder_path(self, folder_path):
+        self.last_folder_path = folder_path
         data = {"last_folder_path": folder_path}
         with open("last_folder.json", "w") as file:
             json.dump(data, file)
@@ -132,6 +142,9 @@ class ImageSnippetApp:
     def start_start_screen(self):
         self.main_frame.pack_forget()
         self.start_frame.pack()
+        if self.last_folder_path:
+            self.load_last_button.pack(pady=5, expand=True, fill=tk.X, side=tk.TOP)
+        
 
     def open_folder(self):
         folder_path = filedialog.askdirectory(title="Select Folder", initialdir=self.last_folder_path)
@@ -197,10 +210,10 @@ class ImageSnippetApp:
             if use_small_images:
                 image.thumbnail((100, 100))
             tk_image = ImageTk.PhotoImage(image)
-            label = tk.Label(target, image=tk_image)
+            label = tk.Label(target, image=tk_image, bg="white")
             label.image = tk_image
             # put in frame
-            label.pack(side=tk.LEFT, padx=5)
+            label.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
                 
 
     def set_difficulty(self, level, snippet_name):
@@ -263,7 +276,7 @@ class ImageSnippetApp:
         generate_combinations_checkbox = tk.Checkbutton(self.settings_frame, text="Generate snippet combinations", variable=self.should_generate_combinations)
         generate_combinations_checkbox.pack(pady=5)
 
-        back_button = tk.Button(self.settings_frame, text="Start", command=self.save_settings_and_redirect)
+        back_button = tk.Button(self.settings_frame, text="Start", command=self.save_settings_and_redirect, bg="#c0dbf1")
         back_button.pack(pady=10)
 
     def save_settings_and_redirect(self):
