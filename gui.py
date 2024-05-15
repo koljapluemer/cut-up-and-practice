@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 import os
 import random
+import json
 from PIL import Image, ImageTk
 
 import logging
@@ -25,8 +26,17 @@ class ImageSnippetApp:
         self.options_menu = tk.Menu(self.master)
         self.master.config(menu=self.options_menu)
 
+        self.last_folder_path = None
+        self.load_last_folder_path()
+
+        if self.last_folder_path:
+            self.load_last_button = tk.Button(self.start_frame, text="Load Last Snippet Collection", command=self.load_last_snippet_collection)
+            self.load_last_button.pack(pady=10)
+
         self.open_folder_button = tk.Button(self.start_frame, text="Open Folder", command=self.open_folder)
         self.open_folder_button.pack(pady=10)
+
+  
 
         self.load_example_button = tk.Button(self.start_frame, text="Load Example", command=self.load_example)
         self.load_example_button.pack(pady=10)
@@ -34,6 +44,21 @@ class ImageSnippetApp:
         self.current_image = None
         self.image_index = 0
         self.image_list = []
+
+
+
+    def load_last_folder_path(self):
+        try:
+            with open("last_folder.json", "r") as file:
+                data = json.load(file)
+                self.last_folder_path = data.get("last_folder_path")
+        except FileNotFoundError:
+            pass
+
+    def save_last_folder_path(self, folder_path):
+        data = {"last_folder_path": folder_path}
+        with open("last_folder.json", "w") as file:
+            json.dump(data, file)
 
     def start_main_screen(self):
         logging.info('Starting Main Loop')
@@ -43,11 +68,17 @@ class ImageSnippetApp:
         self.show_next_image()
 
     def open_folder(self):
-        folder_path = filedialog.askdirectory(title="Select Folder")
+        folder_path = filedialog.askdirectory(title="Select Folder", initialdir=self.last_folder_path)
         if folder_path:
-            logging.info(f'Selected folder: {folder_path}')
             self.image_list = self.load_images_from_folder(folder_path)
-            logging.info(f'Loaded {len(self.image_list)} images')
+            if self.image_list:
+                self.last_folder_path = folder_path
+                self.save_last_folder_path(self.last_folder_path)
+                self.start_main_screen()
+
+    def load_last_snippet_collection(self):
+        if self.last_folder_path:
+            self.image_list = self.load_images_from_folder(self.last_folder_path)
             if self.image_list:
                 self.start_main_screen()
 
