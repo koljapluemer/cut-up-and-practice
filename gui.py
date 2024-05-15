@@ -18,7 +18,6 @@ class ImageSnippetApp:
         self.start_frame = tk.Frame(self.master)
         self.start_frame.pack()
 
-        self.main_frame = tk.Frame(self.master)
 
         self.label = tk.Label(self.start_frame, text="Welcome to Image Snippets App", font=("Helvetica", 16))
         self.label.pack(pady=20)
@@ -35,13 +34,32 @@ class ImageSnippetApp:
         self.load_example_button = tk.Button(self.start_frame, text="Load Example", command=self.load_example)
         self.load_example_button.pack(pady=10)
 
-        self.current_snippet_frame = tk.Frame(self.main_frame)
+        # Main Screen Setup
+
+        self.current_snippet_frame = None
+        self.current_snippet_name = None
+        self.image_list = []
+        self.snippets = []
+        
+
+        self.last_folder_path = None
+        self.load_last_folder_path()
+
+        self.main_frame = tk.Frame(self.master)
+
+        self.main_practice_frame = tk.Frame(self.main_frame)
+        self.main_practice_frame.pack()
+
+        self.main_heading = tk.Label(self.main_practice_frame, text="Practice:", font=("Helvetica", 16))
+        self.main_heading.pack(pady=20)
+
+        self.current_snippet_frame = tk.Frame(self.main_practice_frame)
         self.current_snippet_frame.pack(pady=20)
 
         self.current_snippet_label = tk.Label(self.current_snippet_frame)
         self.current_snippet_label.pack()
 
-        self.difficulty_buttons_frame = tk.Frame(self.main_frame)
+        self.difficulty_buttons_frame = tk.Frame(self.main_practice_frame)
         self.difficulty_buttons_frame.pack()
 
         self.difficulty_levels = ["Very Hard", "Hard", "Medium", "Easy", "Very Easy"]
@@ -50,14 +68,23 @@ class ImageSnippetApp:
             button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l))
             button.pack(side=tk.LEFT, padx=5)
 
-        self.current_image_frame = None
-        self.current_snippet_name = None
-        self.image_list = []
-        self.snippets = []
-        
+        # Main Screen Footer 
 
-        self.last_folder_path = None
-        self.load_last_folder_path()
+        # give it quite a bit of top margin
+        self.main_footer_frame = tk.Frame(self.main_frame)
+        self.main_footer_frame.pack(side=tk.BOTTOM, pady=60)
+
+        self.main_footer_buttons_frame = tk.Frame(self.main_footer_frame)
+        self.main_footer_buttons_frame.pack(side=tk.LEFT)
+
+        self.back_button = tk.Button(self.main_footer_buttons_frame, text="End Session", command=self.start_main_screen)
+        self.back_button.pack(padx=5)
+
+        self.main_footer_rating_frame = tk.Frame(self.main_footer_frame)
+        self.main_footer_rating_frame.pack(side=tk.RIGHT)
+
+        self.main_footer_rating_label = tk.Label(self.main_footer_rating_frame, text="Rate the difficulty of the last snippet:")
+        self.main_footer_rating_label.pack()
 
     def load_last_folder_path(self):
         try:
@@ -110,12 +137,9 @@ class ImageSnippetApp:
 
     def load_next_snippet(self):
         if self.snippets:
-            if not self.current_image_frame:
-                self.current_image_frame = tk.Frame(self.main_frame)
-                self.current_image_frame.pack()
             random_snippet = random.choice(self.snippets)
             # Clear existing images before displaying new ones
-            self.clear_current_image_frame()
+            self.clear_current_snippet_frame()
             self.display_snippet_images(random_snippet)
             self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
             # save current snippet name: all image names, made filename safe, connected by —
@@ -124,11 +148,11 @@ class ImageSnippetApp:
             logging.warning('No snippets available.')
 
 
-    def clear_current_image_frame(self):
-        # Check if current_image_frame exists and contains widgets
-        if self.current_image_frame and self.current_image_frame.winfo_children():
-            # Destroy all child widgets in current_image_frame
-            for widget in self.current_image_frame.winfo_children():
+    def clear_current_snippet_frame(self):
+        # Check if current_snippet_frame exists and contains widgets
+        if self.current_snippet_frame and self.current_snippet_frame.winfo_children():
+            # Destroy all child widgets in current_snippet_frame
+            for widget in self.current_snippet_frame.winfo_children():
                 widget.destroy()
 
 
@@ -136,7 +160,7 @@ class ImageSnippetApp:
         for image_path in snippet:
 
             tk_image = self.convert_to_tkimage(image_path)
-            label = tk.Label(self.current_image_frame, image=tk_image)
+            label = tk.Label(self.current_snippet_frame, image=tk_image)
             label.image = tk_image
             # put in frame
             label.pack(side=tk.LEFT, padx=5)
@@ -233,11 +257,19 @@ class ImageSnippetApp:
                 self.snippets.append([sorted_image_list[i], sorted_image_list[(i+1) % len(sorted_image_list)]])
             # append the last snippet combi
             self.snippets.append([sorted_image_list[-1], sorted_image_list[0]])
+            # generate triplets, also in order
+            for i in range(len(sorted_image_list)):
+                self.snippets.append([sorted_image_list[i], sorted_image_list[(i+1) % len(sorted_image_list)], sorted_image_list[(i+2) % len(sorted_image_list)]])
+            # generate the last two, that are wrapping around
+            self.snippets.append([sorted_image_list[-1], sorted_image_list[0], sorted_image_list[1]])
+            self.snippets.append([sorted_image_list[-2], sorted_image_list[-1], sorted_image_list[0]])
+
 
 
 def main():
     root = tk.Tk()
     app = ImageSnippetApp(root)
+    root.configure()
     root.mainloop()
 
 if __name__ == "__main__":
