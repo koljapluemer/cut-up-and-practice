@@ -17,7 +17,7 @@ class ImageSnippetApp:
 
 
         self.master = master
-        self.master.title("Image Snippets App")
+        self.master.title("Cut Up Your Music!")
         self.master.geometry("1000x800")
 
         self.start_frame = tk.Frame(self.master)
@@ -41,9 +41,6 @@ class ImageSnippetApp:
 
         self.open_folder_button = tk.Button(self.start_menu_frame, text="Load Snippets from Local Folder", command=self.open_folder)
         self.open_folder_button.pack(pady=5, expand=True, fill=tk.X)
-
-        self.load_example_button = tk.Button(self.start_menu_frame, text="Load Example Snippets", command=self.load_example)
-        self.load_example_button.pack(pady=5, expand=True, fill=tk.X)
 
         # Main Screen Setup
 
@@ -80,6 +77,8 @@ class ImageSnippetApp:
         self.difficulty_buttons_frame.pack(pady=10)
 
         self.difficulty_levels = ["Very Hard", "Hard", "Medium", "Easy", "Very Easy"]
+        self.codified_difficulty_levels_dict = {level: i for i, level in enumerate(self.difficulty_levels)}
+        self.codified_difficulty_levels_dict["Just Displayed"] = -1
         self.difficulty_buttons = []
         for level in self.difficulty_levels:
             button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.current_snippet_name), font=("Helvetica", 12), height="2", bg="#c0dbf1")
@@ -161,12 +160,6 @@ class ImageSnippetApp:
             if self.image_list:
                 self.open_session_settings()
 
-    def load_example(self):
-        example_folder = os.path.join("assets", "example", "song-1")
-        self.image_list = self.load_images_from_folder(example_folder)
-        if self.image_list:
-            self.open_session_settings()
-
     def load_images_from_folder(self, folder_path):
         image_list = []
         for filename in os.listdir(folder_path):
@@ -192,6 +185,9 @@ class ImageSnippetApp:
             # save current snippet name: all image names, made filename safe, connected by —
             self.current_snippet_name = '—'.join([f'\'{image.split("/")[-1]}\'' for image in random_snippet])
             self.current_snippet = random_snippet
+            # store feedback level with difficulty -1 
+            # so we now that this snippet showed up
+            self.store_feedback("Just Displayed", self.current_snippet_name)
         else:
             logging.warning('No snippets available.')
 
@@ -210,7 +206,7 @@ class ImageSnippetApp:
             if use_small_images:
                 image.thumbnail((100, 100))
             tk_image = ImageTk.PhotoImage(image)
-            label = tk.Label(target, image=tk_image, bg="white")
+            label = tk.Label(target, image=tk_image, bg="white", borderwidth=2, relief="ridge", padx=5, pady=5)
             label.image = tk_image
             # put in frame
             label.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
@@ -229,7 +225,7 @@ class ImageSnippetApp:
 
             feedback_data = {
                 "timestamp": datetime.now().isoformat(),
-                "difficulty_level": difficulty_level
+                "difficulty_level": self.codified_difficulty_levels_dict[difficulty_level]
             }
 
             if not os.path.exists("feedback"):

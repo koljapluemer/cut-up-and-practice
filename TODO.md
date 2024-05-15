@@ -6,7 +6,9 @@
 - think about SEO strategies
 
 
-- make it possible to give feedback on the previous section
-- SR or something
 - overview with last practiced songs, stats, progress :)
 - tool for cutting up stuff (but not needed for me yet...)
+- give feedback that button pressed, maybe disable and enable
+
+- basic fake SR
+- basic README
