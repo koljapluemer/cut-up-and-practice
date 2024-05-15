@@ -21,13 +21,11 @@ class ImageSnippetApp:
         self.options_menu = tk.Menu(self.master)
         self.master.config(menu=self.options_menu)
 
-        self.file_menu = tk.Menu(self.options_menu, tearoff=False)
-        self.options_menu.add_cascade(label="Options", menu=self.file_menu)
-        self.file_menu.add_command(label="Open Image Snippets", command=self.open_images)
-        self.file_menu.add_command(label="Load Example", command=self.load_example)
+        self.open_images_button = tk.Button(self.start_frame, text="Open Image Snippets", command=self.open_images)
+        self.open_images_button.pack(pady=10)
 
-        self.start_button = tk.Button(self.start_frame, text="Start", command=self.start_main_screen)
-        self.start_button.pack(pady=10)
+        self.load_example_button = tk.Button(self.start_frame, text="Load Example", command=self.load_example)
+        self.load_example_button.pack(pady=10)
 
         self.current_image = None
         self.image_index = 0
@@ -48,17 +46,20 @@ class ImageSnippetApp:
         file_paths = [os.path.join(example_folder, file) for file in os.listdir(example_folder)]
         self.image_list = [Image.open(path) for path in file_paths]
 
+        self.start_main_screen()
+
     def show_next_image(self):
         if self.current_image:
             self.current_image.pack_forget()
 
         if self.image_index < len(self.image_list):
+            
             image = self.image_list[self.image_index]
             self.current_image = tk.Label(self.main_frame, image=self.convert_to_tkimage(image))
             self.current_image.pack(pady=20)
 
             self.image_index += 1
-            self.master.after(300, self.show_next_image)
+            self.master.after(30000, self.show_next_image)
         else:
             self.back_to_start_screen()
 
