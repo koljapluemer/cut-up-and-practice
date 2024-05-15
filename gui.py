@@ -37,11 +37,11 @@ class ImageSnippetApp:
         self.load_example_button = tk.Button(self.start_frame, text="Load Example", command=self.load_example)
         self.load_example_button.pack(pady=10)
 
-        self.current_image_frame = tk.Frame(self.main_frame)
-        self.current_image_frame.pack(pady=20)
+        self.current_snippet_frame = tk.Frame(self.main_frame)
+        self.current_snippet_frame.pack(pady=20)
 
-        self.current_image_label = tk.Label(self.current_image_frame)
-        self.current_image_label.pack()
+        self.current_snippet_label = tk.Label(self.current_snippet_frame)
+        self.current_snippet_label.pack()
 
         self.difficulty_buttons_frame = tk.Frame(self.main_frame)
         self.difficulty_buttons_frame.pack()
@@ -52,8 +52,8 @@ class ImageSnippetApp:
             button = tk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l))
             button.pack(side=tk.LEFT, padx=5)
 
-        self.current_image = None
-        self.current_image_name = None
+        self.current_image_frame = None
+        self.current_snippet_name = None
         self.image_list = []
         self.snippets = []
         
@@ -79,7 +79,7 @@ class ImageSnippetApp:
         self.start_frame.pack_forget()
         self.main_frame.pack()
 
-        self.show_next_snippet()
+        self.load_next_snippet()
 
     def open_folder(self):
         folder_path = filedialog.askdirectory(title="Select Folder", initialdir=self.last_folder_path)
@@ -111,24 +111,40 @@ class ImageSnippetApp:
                 image_list.append(image)
         return image_list
 
-    def show_next_snippet(self):
-        if self.current_image:
-            self.current_image.pack_forget()
-
-        if self.image_list:
-            logging.info('Showing next random image')
-            image = random.choice(self.image_list)
-            self.current_image_name = os.path.basename(image.filename)
-            tk_image = self.convert_to_tkimage(image)
-            self.current_image = tk.Label(self.main_frame, image=tk_image)
-            self.current_image.image = tk_image  # Store a reference to the image
-            logging.info(f'Image size: {image.size}')
-            self.current_image.pack(pady=20)
-
-            self.master.after(int(self.next_snippet_duration) * 1000, self.show_next_snippet)
+    def load_next_snippet(self):
+        if self.snippets:
+            if not self.current_image_frame:
+                self.current_image_frame = tk.Frame(self.main_frame)
+                self.current_image_frame.pack()
+            logging.info('Loading next random snippet')
+            random_snippet = random.choice(self.snippets)
+            # Clear existing images before displaying new ones
+            self.clear_current_image_frame()
+            self.display_snippet_images(random_snippet)
+            self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
         else:
-            logging.warning('No image to display.')
-            
+            logging.warning('No snippets available.')
+
+
+    def clear_current_image_frame(self):
+        # Check if current_image_frame exists and contains widgets
+        if self.current_image_frame and self.current_image_frame.winfo_children():
+            logging.info('Clearing current image frame')
+            # Destroy all child widgets in current_image_frame
+            for widget in self.current_image_frame.winfo_children():
+                widget.destroy()
+
+
+    def display_snippet_images(self, snippet):
+        for image_path in snippet:
+            logging.info(f'Displaying image: {image_path}')
+
+            tk_image = self.convert_to_tkimage(image_path)
+            label = tk.Label(self.current_image_frame, image=tk_image)
+            label.image = tk_image
+            # put in frame
+            label.pack(side=tk.LEFT, padx=5)
+                
 
     def set_difficulty(self, level):
         logging.info(f'Setting difficulty level to: {level}')
@@ -159,11 +175,11 @@ class ImageSnippetApp:
             else:
                 data = []
 
-            image_feedback = next((item for item in data if self.current_image_name in item), None)
+            image_feedback = next((item for item in data if self.current_snippet_name in item), None)
             if image_feedback is not None:
-                image_feedback[self.current_image_name].append(feedback_data)
+                image_feedback[self.current_snippet_name].append(feedback_data)
             else:
-                image_feedback = {self.current_image_name: [feedback_data]}
+                image_feedback = {self.current_snippet_name: [feedback_data]}
                 data.append(image_feedback)
 
             with open(json_path, "w") as file:
@@ -190,6 +206,7 @@ class ImageSnippetApp:
 
         # checkbox to set whether snippet combinations should be generated
         self.should_generate_combinations = tk.BooleanVar()
+        self.should_generate_combinations.set(True)
         generate_combinations_checkbox = tk.Checkbutton(self.settings_frame, text="Generate snippet combinations", variable=self.should_generate_combinations)
         generate_combinations_checkbox.pack(pady=5)
 
@@ -202,23 +219,25 @@ class ImageSnippetApp:
         self.next_snippet_duration = self.next_snippet_duration.get()
         # if generate_combinations is checked, generate combinations
         if self.should_generate_combinations.get():
-            self.generate_combinations()
+            self.generate_combinations(3)
         else:
-            self.snippets = self.image_list
+            self.generate_combinations()
 
 
         self.start_main_screen()
 
-    def generate_combinations(self):
-        # generate pairs, in order
-        # e.g. if we have snippets: 1.png, 2.png, 3.png
-        # ...generate 1-2, 2-3, 3-1 and no more
-        self.snippets = []
-        for i in range(len(self.image_list)):
-            self.snippets.append([self.image_list[i], self.image_list[(i+1) % len(self.image_list)]])
-        # append the last snippet
-        self.snippets.append([self.image_list[-1], self.image_list[0]])
-        logging.info(f'Generated {len(self.snippets)} snippet combinations: \n{self.snippets}')
+    def generate_combinations(self, depth=0):
+        # wrap each element of the image list in a list
+        self.snippets = [[image] for image in self.image_list]
+        if depth > 0:
+            # generate pairs, in order
+            # e.g. if we have snippets: 1.png, 2.png, 3.png
+            # ...generate 1-2, 2-3, 3-1 and no more
+            for i in range(len(self.image_list)):
+                self.snippets.append([self.image_list[i], self.image_list[(i+1) % len(self.image_list)]])
+            # append the last snippet
+            self.snippets.append([self.image_list[-1], self.image_list[0]])
+            logging.info(f'Generated {len(self.snippets)} snippet combinations: \n{self.snippets}')
 
 
 
