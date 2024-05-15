@@ -55,6 +55,7 @@ class ImageSnippetApp:
         self.current_image = None
         self.current_image_name = None
         self.image_list = []
+        self.snippets = []
         
 
         self.last_folder_path = None
@@ -78,7 +79,7 @@ class ImageSnippetApp:
         self.start_frame.pack_forget()
         self.main_frame.pack()
 
-        self.show_next_image()
+        self.show_next_snippet()
 
     def open_folder(self):
         folder_path = filedialog.askdirectory(title="Select Folder", initialdir=self.last_folder_path)
@@ -110,7 +111,7 @@ class ImageSnippetApp:
                 image_list.append(image)
         return image_list
 
-    def show_next_image(self):
+    def show_next_snippet(self):
         if self.current_image:
             self.current_image.pack_forget()
 
@@ -124,7 +125,7 @@ class ImageSnippetApp:
             logging.info(f'Image size: {image.size}')
             self.current_image.pack(pady=20)
 
-            self.master.after(int(self.next_snippet_duration) * 1000, self.show_next_image)
+            self.master.after(int(self.next_snippet_duration) * 1000, self.show_next_snippet)
         else:
             logging.warning('No image to display.')
             
@@ -187,6 +188,11 @@ class ImageSnippetApp:
         duration_entry = tk.Entry(self.settings_frame, textvariable=self.next_snippet_duration)
         duration_entry.pack(pady=5)
 
+        # checkbox to set whether snippet combinations should be generated
+        self.should_generate_combinations = tk.BooleanVar()
+        generate_combinations_checkbox = tk.Checkbutton(self.settings_frame, text="Generate snippet combinations", variable=self.should_generate_combinations)
+        generate_combinations_checkbox.pack(pady=5)
+
         back_button = tk.Button(self.settings_frame, text="Start", command=self.save_settings_and_redirect)
         back_button.pack(pady=10)
 
@@ -194,7 +200,27 @@ class ImageSnippetApp:
         # delete the settings frame
         self.settings_frame.pack_forget()
         self.next_snippet_duration = self.next_snippet_duration.get()
+        # if generate_combinations is checked, generate combinations
+        if self.should_generate_combinations.get():
+            self.generate_combinations()
+        else:
+            self.snippets = self.image_list
+
+
         self.start_main_screen()
+
+    def generate_combinations(self):
+        # generate pairs, in order
+        # e.g. if we have snippets: 1.png, 2.png, 3.png
+        # ...generate 1-2, 2-3, 3-1 and no more
+        self.snippets = []
+        for i in range(len(self.image_list)):
+            self.snippets.append([self.image_list[i], self.image_list[(i+1) % len(self.image_list)]])
+        # append the last snippet
+        self.snippets.append([self.image_list[-1], self.image_list[0]])
+        logging.info(f'Generated {len(self.snippets)} snippet combinations: \n{self.snippets}')
+
+
 
 
 def main():
