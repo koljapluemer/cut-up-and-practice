@@ -10,5 +10,5 @@
 - tool for cutting up stuff (but not needed for me yet...)
 - give feedback that button pressed, maybe disable and enable
 
-- basic fake SR
 - basic README
+- possibly demo video

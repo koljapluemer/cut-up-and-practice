@@ -12,10 +12,6 @@ import logging
 
 class ImageSnippetApp:
     def __init__(self, master):
-
-
-
-
         self.master = master
         self.master.title("Cut Up Your Music!")
         self.master.geometry("1000x800")
@@ -53,7 +49,6 @@ class ImageSnippetApp:
 
         self.image_list = []
         self.snippets = []
-        
 
         self.main_frame = tk.Frame(self.master, padx=10, pady=10)
 
@@ -176,16 +171,47 @@ class ImageSnippetApp:
 
         if self.snippets:
             # load the feedback file
+            # check if the feedback file exists
+            snippets_to_choose_from = []
+            if self.last_folder_path:
+                folder_name = os.path.basename(self.last_folder_path)
+                safe_folder_name = re.sub(r'[^\w\s-]', '', folder_name)
+                json_filename = f"{safe_folder_name}.json"
+                json_path = os.path.join("feedback", json_filename)
+                if os.path.exists(json_path):
+                    with open(json_path, "r") as file:
+                        data = json.load(file)
+                    # for each snippet, get the average difficulty level (ignore -1 values)
+                    # and sort the snippets by difficulty
+                    snippet_difficulty = {}
+                    for item in data:
+                        for key, value in item.items():
+                            difficulty_levels = [feedback["difficulty_level"] for feedback in value]
+                            # ignore -1 values
+                            difficulty_levels = [level for level in difficulty_levels if level != -1]
+                            if difficulty_levels:
+                                snippet_difficulty[key] = sum(difficulty_levels) / len(difficulty_levels)
+                    # add the 3 snippets with the lowest difficulty to the snippets_to_choose_from list:
+                    # sort by difficulty, take the first 3
+                    snippet_names_to_choose_from = sorted(snippet_difficulty, key=snippet_difficulty.get)[:3]
+                    # loop snippets to get matching name
+                    for snippet in self.snippets:
+                        snippet_name = self.name_from_snippet(snippet)
+                        if snippet_name in snippet_names_to_choose_from:
+                            snippets_to_choose_from.append(snippet)
+
+            # append the rest of the snippets to the end of snippets_to_choose_from
+            snippets_to_choose_from += self.snippets
 
             self.last_snippet = self.current_snippet
             self.last_snippet_name = self.current_snippet_name
-            # find random new one
-            random_snippet = random.choice(self.snippets)
+            # find random new one out of the first 5 snippets_to_choose_from
+            random_snippet = random.choice(snippets_to_choose_from[:5])
             self.clear_frame(self.current_snippet_frame)
             self.display_snippet_images(random_snippet, self.current_snippet_frame)
             self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
             # save current snippet name: all image names, made filename safe, connected by —
-            self.current_snippet_name = '—'.join([f'\'{image.split("/")[-1]}\'' for image in random_snippet])
+            self.current_snippet_name = self.name_from_snippet(random_snippet)
             self.current_snippet = random_snippet
             # store feedback level with difficulty -1 
             # so we now that this snippet showed up
@@ -309,7 +335,8 @@ class ImageSnippetApp:
             self.snippets.append([sorted_image_list[-1], sorted_image_list[0], sorted_image_list[1]])
             self.snippets.append([sorted_image_list[-2], sorted_image_list[-1], sorted_image_list[0]])
 
-
+    def name_from_snippet(self, snippet):
+        '—'.join([f'\'{image.split("/")[-1]}\'' for image in snippet])
 
 def main():
     root = tk.Tk()
