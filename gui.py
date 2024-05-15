@@ -60,7 +60,9 @@ class ImageSnippetApp:
         if self.image_index < len(self.image_list):
             logging.info(f'Showing image {self.image_index + 1}')
             image = self.image_list[self.image_index]
-            self.current_image = tk.Label(self.main_frame, image=self.convert_to_tkimage(image))
+            tk_image = self.convert_to_tkimage(image)
+            self.current_image = tk.Label(self.main_frame, image=tk_image)
+            self.current_image.image = tk_image  # Store a reference to the image
             logging.info(f'Image size: {image.size}')
             self.current_image.pack(pady=20)
 
