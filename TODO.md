@@ -12,3 +12,5 @@
 
 - basic README
 - possibly demo video
+
+- warning when no snippets loaded;show snippets when loaded

@@ -208,8 +208,12 @@ class ImageSnippetApp:
             self.last_snippet = self.current_snippet
             self.last_snippet_name = self.current_snippet_name
             # find random new one out of the first 5 snippets_to_choose_from
-            random_index = random.randint(0, min(4, len(snippets_to_choose_from) - 1))
-            random_snippet = snippets_to_choose_from[random_index]
+            found_snippet_not_equivalent_to_last = False
+            while not found_snippet_not_equivalent_to_last:
+                random_index = random.randint(0, min(4, len(snippets_to_choose_from) - 1))
+                random_snippet = snippets_to_choose_from[random_index]
+                if random_snippet != self.last_snippet:
+                    found_snippet_not_equivalent_to_last = True
             self.clear_frame(self.current_snippet_frame)
             self.display_snippet_images(random_snippet, self.current_snippet_frame)
             self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
