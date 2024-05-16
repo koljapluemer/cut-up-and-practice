@@ -201,16 +201,18 @@ class ImageSnippetApp:
                             snippets_to_choose_from.append(snippet)
 
             # append the rest of the snippets to the end of snippets_to_choose_from
-            snippets_to_choose_from += self.snippets
+            rest_of_snippets_shuffled = self.snippets.copy()
+            random.shuffle(rest_of_snippets_shuffled)
+            snippets_to_choose_from += rest_of_snippets_shuffled
 
             self.last_snippet = self.current_snippet
             self.last_snippet_name = self.current_snippet_name
             # find random new one out of the first 5 snippets_to_choose_from
-            random_snippet = random.choice(snippets_to_choose_from[:5])
+            random_index = random.randint(0, min(4, len(snippets_to_choose_from) - 1))
+            random_snippet = snippets_to_choose_from[random_index]
             self.clear_frame(self.current_snippet_frame)
             self.display_snippet_images(random_snippet, self.current_snippet_frame)
             self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
-            # save current snippet name: all image names, made filename safe, connected by —
             self.current_snippet_name = self.name_from_snippet(random_snippet)
             self.current_snippet = random_snippet
             # store feedback level with difficulty -1 
@@ -336,7 +338,7 @@ class ImageSnippetApp:
             self.snippets.append([sorted_image_list[-2], sorted_image_list[-1], sorted_image_list[0]])
 
     def name_from_snippet(self, snippet):
-        '—'.join([f'\'{image.split("/")[-1]}\'' for image in snippet])
+        return '—'.join([f'\'{image.split("/")[-1]}\'' for image in snippet])
 
 def main():
     root = tk.Tk()
