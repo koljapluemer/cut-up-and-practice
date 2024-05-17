@@ -28,3 +28,5 @@
 	2. establish one where you go full SR, least likely success gets repeated first
 	3. randomly pick them for a session, then go for either just session-length tracking or maybe a moti-question (or threat/challenge) question on occasion
 - if I hash filenames, could rather ethically gather data w/o much risk
+- move magic numbers into consonants
+- consider snippet class

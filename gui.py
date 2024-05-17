@@ -10,6 +10,8 @@ from datetime import datetime
 
 import logging
 
+INTRODUCTION_RATE = 10
+
 class ImageSnippetApp:
     def __init__(self, master):
         self.master = master
@@ -206,11 +208,22 @@ class ImageSnippetApp:
             self.last_snippet_name = self.current_snippet_name
             # find random new one out of the first 5 snippets_to_choose_from
             found_snippet_not_equivalent_to_last = False
-            while not found_snippet_not_equivalent_to_last:
-                random_index = random.randint(0, min(4, len(snippets_to_choose_from) - 1))
+            found_snippet_not_blocked_by_children = False
+            while not found_snippet_not_equivalent_to_last or not found_snippet_not_blocked_by_children:
+                random_index = random.randint(0, min(INTRODUCTION_RATE - 1 + 3, len(snippets_to_choose_from) - 1))
                 random_snippet = snippets_to_choose_from[random_index]
                 if random_snippet != self.last_snippet:
                     found_snippet_not_equivalent_to_last = True
+                # if it's a compound snippet ("—" in name), check if all children have difficulty > 2.5
+                if "—" in self.name_from_snippet(random_snippet):
+                    found_snippet_not_blocked_by_children = True
+                    for child_name in self.name_from_snippet(random_snippet).split("—"):
+                        difficulty = self.get_trailing_difficulty(child_name)
+                        if difficulty < 2.5:
+                            found_snippet_not_blocked_by_children = False
+                            break
+                else:
+                    found_snippet_not_blocked_by_children = True
             self.clear_frame(self.current_snippet_frame)
             self.display_snippet_images(random_snippet, self.current_snippet_frame)
             self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
@@ -220,6 +233,7 @@ class ImageSnippetApp:
             # so we now that this snippet showed up
             self.store_feedback("Just Displayed", self.current_snippet_name)
         else:
+            # if it's not a compound, it cannot be blocked, and we still have to escape the while loop
             logging.warning('No snippets available.')
 
     def get_trailing_difficulty(self, snippet_name):
