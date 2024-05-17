@@ -184,13 +184,10 @@ class ImageSnippetApp:
                     # for each snippet, get the average difficulty level (ignore -1 values)
                     # and sort the snippets by difficulty
                     snippet_difficulty = {}
-                    for item in data:
-                        for key, value in item.items():
-                            difficulty_levels = [feedback["difficulty_level"] for feedback in value]
-                            # ignore -1 values
-                            difficulty_levels = [level for level in difficulty_levels if level != -1]
-                            if difficulty_levels:
-                                snippet_difficulty[key] = sum(difficulty_levels) / len(difficulty_levels)
+                    for snippet in self.snippets:
+                        name = self.name_from_snippet(snippet)
+                        snippet_difficulty[name] = self.get_trailing_difficulty(name)
+
                     # add the 3 snippets with the lowest difficulty to the snippets_to_choose_from list:
                     # sort by difficulty, take the first 3
                     snippet_names_to_choose_from = sorted(snippet_difficulty, key=snippet_difficulty.get)[:3]
@@ -225,6 +222,32 @@ class ImageSnippetApp:
         else:
             logging.warning('No snippets available.')
 
+    def get_trailing_difficulty(self, snippet_name):
+        # we want the average difficulty of the last 10 ratings
+        # if there are less than 10 ratings, we want the average of all ratings
+
+        if self.last_folder_path:
+            folder_name = os.path.basename(self.last_folder_path)
+            safe_folder_name = re.sub(r'[^\w\s-]', '', folder_name)
+            json_filename = f"{safe_folder_name}.json"
+            json_path = os.path.join("feedback", json_filename)
+
+            if os.path.exists(json_path):
+                with open(json_path, "r") as file:
+                    data = json.load(file)
+                image_feedback = next((item for item in data if snippet_name in item), None)
+                if image_feedback is not None:
+                    # get the last 10 feedbacks
+                    feedbacks = image_feedback[snippet_name][-10:]
+                    # get the average of the feedbacks
+                    # note that difficulty_property may be missing or none, so check for that
+                    feedbacks = [feedback.get("difficulty_level") for feedback in feedbacks]
+                    feedbacks = [feedback for feedback in feedbacks if feedback is not None]
+                    # ignore -1 values
+                    feedbacks = [feedback for feedback in feedbacks if feedback != -1]
+                    feedback = sum(feedbacks) / len(feedbacks) if len(feedbacks) > 0 else 2
+                    return feedback
+        return 2
 
     def clear_frame(self, frame):
         # Check if current_snippet_frame exists and contains widgets
