@@ -18,6 +18,8 @@ class ImageSnippetApp:
         self.master.title("Cut Up Your Music!")
         self.master.geometry("1000x800")
 
+        self.current_countdown = None
+
         self.start_frame = tk.Frame(self.master)
 
         self.label = tk.Label(self.start_frame, text="Let's Cut Up Some Music", font=("Helvetica", 16))
@@ -211,6 +213,7 @@ class ImageSnippetApp:
             found_snippet_not_blocked_by_children = False
             while not found_snippet_not_equivalent_to_last or not found_snippet_not_blocked_by_children:
                 random_index = random.randint(0, min(INTRODUCTION_RATE - 1 + 3, len(snippets_to_choose_from) - 1))
+                print("choosing index:", random_index)
                 random_snippet = snippets_to_choose_from[random_index]
                 if random_snippet != self.last_snippet:
                     found_snippet_not_equivalent_to_last = True
@@ -226,7 +229,7 @@ class ImageSnippetApp:
                     found_snippet_not_blocked_by_children = True
             self.clear_frame(self.current_snippet_frame)
             self.display_snippet_images(random_snippet, self.current_snippet_frame)
-            self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
+            self.current_countdown = self.master.after(self.next_snippet_duration * 1000, self.load_next_snippet)
             self.current_snippet_name = self.name_from_snippet(random_snippet)
             self.current_snippet = random_snippet
             # store feedback level with difficulty -1 
@@ -235,6 +238,11 @@ class ImageSnippetApp:
         else:
             # if it's not a compound, it cannot be blocked, and we still have to escape the while loop
             logging.warning('No snippets available.')
+
+    def cancel_countdown(self):
+        if self.current_countdown:
+            self.master.after_cancel(self.current_countdown)
+            self.current_countdown = None
 
     def get_trailing_difficulty(self, snippet_name):
         # we want the average difficulty of the last 10 ratings
@@ -286,7 +294,9 @@ class ImageSnippetApp:
     def set_difficulty(self, level, snippet_name):
         self.store_feedback(level, snippet_name)
         # if "Very Easy", load next snippet
-        if level == "Very Easy":
+        # but only if this is called for current snippet
+        if level == "Very Easy" and snippet_name == self.current_snippet_name:
+            self.cancel_countdown()
             self.load_next_snippet()
 
 
@@ -336,7 +346,7 @@ class ImageSnippetApp:
         duration_label.pack(pady=5)
 
         self.next_snippet_duration = tk.IntVar()
-        self.next_snippet_duration.set(5)
+        self.next_snippet_duration.set(45)
         duration_entry = tk.Entry(self.settings_frame, textvariable=self.next_snippet_duration)
         duration_entry.pack(pady=5)
 
