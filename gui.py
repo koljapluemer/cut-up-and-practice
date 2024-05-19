@@ -285,6 +285,9 @@ class ImageSnippetApp:
 
     def set_difficulty(self, level, snippet_name):
         self.store_feedback(level, snippet_name)
+        # if "Very Easy", load next snippet
+        if level == "Very Easy":
+            self.load_next_snippet()
 
 
     def store_feedback(self, difficulty_level, snippet_name):

@@ -30,3 +30,13 @@
 - if I hash filenames, could rather ethically gather data w/o much risk
 - move magic numbers into consonants
 - consider snippet class
+- skip on "Very Easy"?
+	- ...why not
+
+
+- consider messing with time-until-next-snippet when things are harder/easier (but factor in which direction? xD)
+- do away with the hack of 3 by-difficulty rated items and then randoms. just guess their likely difficulty and sort all, or something
+	- also, just ebisu them all :)
+
+- also, bug: sometimes same snippet is chosen twice in a row
+	- automated testing would help, my friend :)
