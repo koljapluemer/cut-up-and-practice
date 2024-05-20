@@ -40,3 +40,5 @@
 	- automated testing would help, my friend :)
 
 - see that under some conditions missing snippets are sought out
+
+- establish classes. this is getting out of hand with the nested dicts.

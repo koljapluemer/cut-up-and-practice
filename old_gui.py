@@ -66,18 +66,19 @@ class ImageSnippetApp:
 
         # get all snippets:
         self.snippets_statistics = self.get_all_stored_feedback()
+        # print("stats", self.snippets_statistics)
 
-        for snippet_stat in self.snippets_statistics:
+        for song_stats in self.snippets_statistics:
             # first, loop all songs
             # within each song, loop all feedback
-            song_name = snippet_stat
+            song_name = song_stats
 
             id = self.songs_frame.insert("", "end", values=(song_name, "", ""))
 
             song_feedbacks = {}
             # example:
             # song_feedbacks["snippet1"] = {nr_of_times_shown: 5, average_difficulty: 2.5}
-            for feedback in self.snippets_statistics[snippet_stat]:
+            for snippet_stats in self.snippets_statistics[song_stats]:
                 snippet_dict = {
                     "nr_of_times_shown": 0,
                     "average_difficulty": -1
@@ -85,11 +86,13 @@ class ImageSnippetApp:
                 # nr of times by filtering entries with difficulty -1
                 # format of feedback: {"'Screenshot from 2024-05-15 15-51-24.png'": []}
                 nr_of_times_shown = 0
-                for key in feedback:
-                    if feedback[key] and feedback[key][0]["difficulty_level"] == -1:
-                        nr_of_times_shown += 1
+                for key in snippet_stats:
+                    # print(snippet_stats[key])
+                    for feedback in snippet_stats[key]:
+                        if feedback["difficulty_level"] == -1:
+                            nr_of_times_shown += 1
                 snippet_dict["nr_of_times_shown"] = nr_of_times_shown
-                snippet_dict["average_difficulty"] = self.get_average_difficulty(snippet_stat) 
+                snippet_dict["average_difficulty"] = self.get_average_difficulty(snippet_stats) 
                 
                 song_feedbacks[key] = snippet_dict
             
@@ -346,26 +349,16 @@ class ImageSnippetApp:
                     return feedback
         return 2
 
-    def get_average_difficulty(self, snippet_name):
-        # get the average difficulty of all ratings
-        if self.last_folder_path:
-            folder_name = os.path.basename(self.last_folder_path)
-            safe_folder_name = re.sub(r'[^\w\s-]', '', folder_name)
-            json_filename = f"{safe_folder_name}.json"
-            json_path = os.path.join("feedback", json_filename)
+    def get_average_difficulty(self, feedback_dict):
+        print("feedback_dict", feedback_dict)
+        print("----")
+        relevant_feedback_values = []
+        for key in feedback_dict:
+                print("feedback", feedback_dict[key])
+                if feedback_dict[key]["difficulty_level"] != -1:
+                    relevant_feedback_values.append(feedback["difficulty_level"])
+        return sum(relevant_feedback_values) / len(relevant_feedback_values) if len(relevant_feedback_values) > 0 else 2
 
-            if os.path.exists(json_path):
-                with open(json_path, "r") as file:
-                    data = json.load(file)
-                image_feedback = next((item for item in data if snippet_name in item), None)
-                if image_feedback is not None:
-                    feedbacks = image_feedback[snippet_name]
-                    feedbacks = [feedback.get("difficulty_level") for feedback in feedbacks]
-                    feedbacks = [feedback for feedback in feedbacks if feedback is not None]
-                    feedbacks = [feedback for feedback in feedbacks if feedback != -1]
-                    feedback = sum(feedbacks) / len(feedbacks) if len(feedbacks) > 0 else 2
-                    return feedback
-        return -1
 
     def clear_frame(self, frame):
         # Check if current_snippet_frame exists and contains widgets
