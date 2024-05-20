@@ -104,7 +104,6 @@ class PracticeView(ttk.Frame):
         # for every snippet, preload the SnippetImages
         for snippet in self.snippets:
             snippet.snippet_images
-        print("loaded snippets", self.snippets)
 
     @db_session
     def load_random_snippet(self):

@@ -50,4 +50,14 @@ class LoadView(ttk.Frame):
                 # first: Snippets with 1 SnippetImage each
                 for img_obj in snippet_images:
                     self.db.Snippet(snippet_images=[img_obj], music_piece=music_piece, snippet_name=img_obj.path.split("/")[-1])
-                    
+                
+                # second: Snippets with 2 SnippetImages each
+                # order by filename and only connect direct neighbors
+                snippet_images.sort(key=lambda x: x.path)
+                for i in range(0, len(snippet_images)-1, 2):
+                    self.db.Snippet(snippet_images=[snippet_images[i], snippet_images[i+1]], music_piece=music_piece, snippet_name=f"{snippet_images[i].path.split('/')[-1]} and {snippet_images[i+1].path.split('/')[-1]}")
+
+                # third: Snippets with 3 SnippetImages each
+                # also, only connect direct neighbors
+                for i in range(0, len(snippet_images)-2, 3):
+                    self.db.Snippet(snippet_images=[snippet_images[i], snippet_images[i+1], snippet_images[i+2]], music_piece=music_piece, snippet_name=f"{snippet_images[i].path.split('/')[-1]}, {snippet_images[i+1].path.split('/')[-1]} and {snippet_images[i+2].path.split('/')[-1]}")
