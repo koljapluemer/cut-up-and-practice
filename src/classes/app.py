@@ -8,6 +8,8 @@ from .views.practice_view import PracticeView
 from .views.stats_view import StatsView
 from .views.load_view import LoadView
 
+import time, datetime
+
 from pony.orm import *
 
 class App(ThemedTk):
@@ -68,10 +70,8 @@ class App(ThemedTk):
 
         class SnippetLog(db.Entity):
             snippet = Required(Snippet)
-            time_stamp = Required(str)
+            timestamp = Required(datetime.datetime, default=datetime.datetime.now)
             log_type = Required(str)
-
-        class FeedbackLog(SnippetLog):
-            feedback = Required(int)
+            difficulty = Optional(int)
         
         db.generate_mapping(create_tables=True)

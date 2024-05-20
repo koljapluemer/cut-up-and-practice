@@ -22,10 +22,8 @@ class PracticeView(ttk.Frame):
         # GUI Setup
         self.current_snippet = None
         self.current_snippet_frame = None
-        self.current_snippet_name = None
 
         self.last_snippet = None
-        self.last_snippet_name = None
 
         self.image_list = []
         self.snippets = []
@@ -57,7 +55,7 @@ class PracticeView(ttk.Frame):
         self.codified_difficulty_levels_dict["Just Displayed"] = -1
         self.difficulty_buttons = []
         for level in self.difficulty_levels:
-            button = ttk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.current_snippet_name))
+            button = ttk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.current_snippet))
             button.pack(side=tk.LEFT, padx=5)
 
         # Footer 
@@ -80,7 +78,7 @@ class PracticeView(ttk.Frame):
         self.main_footer_rating_buttons_frame = ttk.Frame(self.main_footer_rating_frame)
 
         for level in self.difficulty_levels:
-            button = ttk.Button(self.main_footer_rating_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.last_snippet_name))
+            button = ttk.Button(self.main_footer_rating_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.last_snippet))
             button.pack(side=tk.LEFT)
 
         self.main_footer_rating_buttons_frame.pack(side=tk.BOTTOM)
@@ -109,7 +107,6 @@ class PracticeView(ttk.Frame):
     def load_random_snippet(self):
         if self.snippets:
             self.last_snippet = self.current_snippet
-            self.last_snippet_name = self.current_snippet_name
 
             self.current_snippet = random.choice(self.snippets)
             self.clear_snippet_renderer()
@@ -135,3 +132,8 @@ class PracticeView(ttk.Frame):
     def clear_snippet_renderer(self):
         for widget in self.current_snippet_label.winfo_children():
             widget.destroy()
+
+    @db_session
+    def set_difficulty(self, difficulty, snippet):
+        # create SnippetLog
+        self.db.SnippetLog(snippet=snippet, difficulty=self.codified_difficulty_levels_dict[difficulty], log_type="feedback")
