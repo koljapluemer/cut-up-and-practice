@@ -10,7 +10,6 @@ from .views.load_view import LoadView
 
 from pony.orm import *
 
-
 class App(ThemedTk):
     def __init__(self):
         super().__init__(theme="arc")
@@ -21,6 +20,8 @@ class App(ThemedTk):
         self.db = Database()
         self.db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
         self.define_entities(self.db)
+        self.test_db()
+
 
         # init views
 
@@ -36,6 +37,10 @@ class App(ThemedTk):
         self.go_to("start")
 
         self.mainloop()
+
+    @db_session
+    def test_db(self):
+        self.db.MusicPiece(title="Test Piece", folder_path="test")
 
     def go_to(self, target):
         print(f"Going to {target}")

@@ -2,10 +2,12 @@ from tkinter import ttk
 from tkinter import filedialog
 import os
 
+from pony.orm import *
 
 class LoadView(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
+        self.db = parent.db
         ttk.Label(self, text="Load Snippets From a Folder on Your Device").pack()
         ttk.Button(self, text="Select Folder", command=self.open_folder).pack()
 
@@ -31,9 +33,11 @@ class LoadView(ttk.Frame):
             # buttons to confirm and cancel
             ttk.Button(self, text="Create Snippets", command=self.confirm_images).pack()
 
+    @db_session
     def confirm_images(self):
             if self.image_list:
 
                 for image in self.image_list:
                     print(image[0], image[1])
+                    self.db.SnippetImage(path=image[1])
                     
