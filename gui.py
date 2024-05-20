@@ -47,9 +47,18 @@ class ImageSnippetApp:
         # Statistics Screen
 
         self.statistics_frame = tk.Frame(self.master, borderwidth=2, relief="groove", padx=10, pady=10)
-        self.songs_frame = ttk.Treeview(self.statistics_frame, selectmode="browse")
+        self.statistics_main_frame = tk.Frame(self.statistics_frame, borderwidth=2, relief="groove", padx=10, pady=10)
+        self.statistics_main_frame.pack(expand=True, fill="both")
+        self.songs_frame = ttk.Treeview(self.statistics_main_frame, columns=("name", "times_shown", "average_difficulty"))
+        self.songs_frame.heading("name", text="Snippet")
+        self.songs_frame.column("name", width=600)
+        self.songs_frame.heading("times_shown", text="Times shown")
+        self.songs_frame.column("times_shown", width=30, anchor="center")
+        self.songs_frame.heading("average_difficulty", text="Average Difficulty")
+        self.songs_frame.column("average_difficulty", width=30, anchor="center")
+        self.songs_frame.pack(pady=10, expand=True, fill="both")
 
-        song_scrollbar = tk.Scrollbar(self.statistics_frame, orient="vertical", command=self.songs_frame.yview)
+        song_scrollbar = tk.Scrollbar(self.statistics_main_frame, orient="vertical", command=self.songs_frame.yview)
         song_scrollbar.pack(side=tk.RIGHT, fill="y")
 
         # for every snippet, show how often it was shown (feedback level -1)
@@ -62,49 +71,34 @@ class ImageSnippetApp:
             # first, loop all songs
             # within each song, loop all feedback
             song_name = snippet_stat
-            # self.songs_frame = tk.Canvas(self.statistics_frame, borderwidth=2, relief="groove", scrollregion=(0, 0, 500, 1000))
-            self.songs_frame.pack(pady=10, expand=True, fill="both")
-            # song_label = tk.Label(self.songs_frame, text=song_name, font=("Helvetica", 24))
-            # song_label.pack()
-            self.songs_frame.insert("", "end", text=song_name)
 
-            # # enable scrolling
-     
+            id = self.songs_frame.insert("", "end", values=(song_name, "", ""))
 
             song_feedbacks = {}
             # example:
             # song_feedbacks["snippet1"] = {nr_of_times_shown: 5, average_difficulty: 2.5}
             for feedback in self.snippets_statistics[snippet_stat]:
-                snippet_dict = {}
+                snippet_dict = {
+                    "nr_of_times_shown": 0,
+                    "average_difficulty": -1
+                }
                 # nr of times by filtering entries with difficulty -1
                 # format of feedback: {"'Screenshot from 2024-05-15 15-51-24.png'": []}
-                feedback_display_only_entries = [key for key in feedback if feedback[key] == []]
-                snippet_dict["nr_of_times_shown"] = len(feedback_display_only_entries)
-                snippet_dict["average_difficulty"] = self.get_average_difficulty(snippet_stat)
+                nr_of_times_shown = 0
+                for key in feedback:
+                    if feedback[key] and feedback[key][0]["difficulty_level"] == -1:
+                        nr_of_times_shown += 1
+                snippet_dict["nr_of_times_shown"] = nr_of_times_shown
+                snippet_dict["average_difficulty"] = self.get_average_difficulty(snippet_stat) 
                 
-                song_feedbacks.update({key: snippet_dict for key in feedback_display_only_entries})
+                song_feedbacks[key] = snippet_dict
             
             # sort by average difficulty
             song_feedbacks = {k: v for k, v in sorted(song_feedbacks.items(), key=lambda item: item[1]["average_difficulty"])}
 
             # create labels for each snippet
             for snippet in song_feedbacks:
-                # snippet_frame = tk.Frame(self.songs_frame, borderwidth=2, relief="groove", padx=10, pady=10)
-
-                # self.songs_frame.insert("", "end", snippet_frame, text=snippet, values=(song_feedbacks[snippet]["nr_of_times_shown"], song_feedbacks[snippet]["average_difficulty"]))
-                # snippet_label = tk.Label(snippet_frame, text=snippet, font=("Helvetica", 14))
-                # snippet_label.pack()
-
-                # snippet_nr_of_times_shown_label = tk.Label(snippet_frame, text=f"Shown {song_feedbacks[snippet]['nr_of_times_shown']} times")
-                # snippet_nr_of_times_shown_label.pack()
-
-                # snippet_average_difficulty_label = tk.Label(snippet_frame, text=f"Average difficulty: {song_feedbacks[snippet]['average_difficulty']}")
-                # snippet_average_difficulty_label.pack()
-
-                # adapt to item tree usage
-
-                # id = tree.insert('', 'end', text='Tutorial')
-                self.songs_frame.insert("", 'end', text=f"{snippet}", values=(song_feedbacks[snippet]["nr_of_times_shown"], song_feedbacks[snippet]["average_difficulty"]))
+                self.songs_frame.insert(id, 'end', values=(snippet, song_feedbacks[snippet]["nr_of_times_shown"], song_feedbacks[snippet]["average_difficulty"]))
 
 
         # back to main menu button
@@ -224,7 +218,7 @@ class ImageSnippetApp:
     def start_statistics_screen(self):
         self.main_frame.pack_forget()
         self.start_frame.pack_forget()
-        self.statistics_frame.pack()   
+        self.statistics_frame.pack(expand=True, fill="both")
 
     def open_folder(self):
         folder_path = filedialog.askdirectory(title="Select Folder", initialdir=self.last_folder_path)
