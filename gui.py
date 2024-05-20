@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import PhotoImage
 from tkinter import filedialog
 import os
@@ -40,7 +41,76 @@ class ImageSnippetApp:
         self.load_last_button = tk.Button(self.start_menu_frame, text="Continue Last Practice", command=self.load_last_snippet_collection, bg="#c0dbf1")
 
         self.open_folder_button = tk.Button(self.start_menu_frame, text="Load Snippets from Local Folder", command=self.open_folder)
-        self.open_folder_button.pack(pady=5, expand=True, fill=tk.X)
+
+        self.statistics_button = tk.Button(self.start_menu_frame, text="Statistics", command=self.start_statistics_screen)
+
+        # Statistics Screen
+
+        self.statistics_frame = tk.Frame(self.master, borderwidth=2, relief="groove", padx=10, pady=10)
+        self.songs_frame = ttk.Treeview(self.statistics_frame, selectmode="browse")
+
+        song_scrollbar = tk.Scrollbar(self.statistics_frame, orient="vertical", command=self.songs_frame.yview)
+        song_scrollbar.pack(side=tk.RIGHT, fill="y")
+
+        # for every snippet, show how often it was shown (feedback level -1)
+        # and the average difficulty level:
+
+        # get all snippets:
+        self.snippets_statistics = self.get_all_stored_feedback()
+
+        for snippet_stat in self.snippets_statistics:
+            # first, loop all songs
+            # within each song, loop all feedback
+            song_name = snippet_stat
+            # self.songs_frame = tk.Canvas(self.statistics_frame, borderwidth=2, relief="groove", scrollregion=(0, 0, 500, 1000))
+            self.songs_frame.pack(pady=10, expand=True, fill="both")
+            # song_label = tk.Label(self.songs_frame, text=song_name, font=("Helvetica", 24))
+            # song_label.pack()
+            self.songs_frame.insert("", "end", text=song_name)
+
+            # # enable scrolling
+     
+
+            song_feedbacks = {}
+            # example:
+            # song_feedbacks["snippet1"] = {nr_of_times_shown: 5, average_difficulty: 2.5}
+            for feedback in self.snippets_statistics[snippet_stat]:
+                snippet_dict = {}
+                # nr of times by filtering entries with difficulty -1
+                # format of feedback: {"'Screenshot from 2024-05-15 15-51-24.png'": []}
+                feedback_display_only_entries = [key for key in feedback if feedback[key] == []]
+                snippet_dict["nr_of_times_shown"] = len(feedback_display_only_entries)
+                snippet_dict["average_difficulty"] = self.get_average_difficulty(snippet_stat)
+                
+                song_feedbacks.update({key: snippet_dict for key in feedback_display_only_entries})
+            
+            # sort by average difficulty
+            song_feedbacks = {k: v for k, v in sorted(song_feedbacks.items(), key=lambda item: item[1]["average_difficulty"])}
+
+            # create labels for each snippet
+            for snippet in song_feedbacks:
+                # snippet_frame = tk.Frame(self.songs_frame, borderwidth=2, relief="groove", padx=10, pady=10)
+
+                # self.songs_frame.insert("", "end", snippet_frame, text=snippet, values=(song_feedbacks[snippet]["nr_of_times_shown"], song_feedbacks[snippet]["average_difficulty"]))
+                # snippet_label = tk.Label(snippet_frame, text=snippet, font=("Helvetica", 14))
+                # snippet_label.pack()
+
+                # snippet_nr_of_times_shown_label = tk.Label(snippet_frame, text=f"Shown {song_feedbacks[snippet]['nr_of_times_shown']} times")
+                # snippet_nr_of_times_shown_label.pack()
+
+                # snippet_average_difficulty_label = tk.Label(snippet_frame, text=f"Average difficulty: {song_feedbacks[snippet]['average_difficulty']}")
+                # snippet_average_difficulty_label.pack()
+
+                # adapt to item tree usage
+
+                # id = tree.insert('', 'end', text='Tutorial')
+                self.songs_frame.insert("", 'end', text=f"{snippet}", values=(song_feedbacks[snippet]["nr_of_times_shown"], song_feedbacks[snippet]["average_difficulty"]))
+
+
+        # back to main menu button
+        back_to_main_button = tk.Button(self.statistics_frame, text="Back to Start", command=self.start_start_screen)
+        back_to_main_button.pack(pady=10)
+
 
         # Main Screen Setup
 
@@ -116,6 +186,7 @@ class ImageSnippetApp:
 
 
 
+
  
     def load_last_folder_path(self):
         try:
@@ -138,11 +209,22 @@ class ImageSnippetApp:
         self.load_next_snippet()
 
     def start_start_screen(self):
+        # kill countdown if it's running
+        self.cancel_countdown()
         self.main_frame.pack_forget()
+        self.statistics_frame.pack_forget()
         self.start_frame.pack()
         if self.last_folder_path:
             self.load_last_button.pack(pady=5, expand=True, fill=tk.X, side=tk.TOP)
+            # also pack the statistics button
+            self.statistics_button.pack(pady=5, expand=True, fill=tk.X, side=tk.TOP)
+        self.open_folder_button.pack(pady=5, expand=True, fill=tk.X)
         
+
+    def start_statistics_screen(self):
+        self.main_frame.pack_forget()
+        self.start_frame.pack_forget()
+        self.statistics_frame.pack()   
 
     def open_folder(self):
         folder_path = filedialog.askdirectory(title="Select Folder", initialdir=self.last_folder_path)
@@ -213,7 +295,6 @@ class ImageSnippetApp:
             found_snippet_not_blocked_by_children = False
             while not found_snippet_not_equivalent_to_last or not found_snippet_not_blocked_by_children:
                 random_index = random.randint(0, min(INTRODUCTION_RATE - 1 + 3, len(snippets_to_choose_from) - 1))
-                print("choosing index:", random_index)
                 random_snippet = snippets_to_choose_from[random_index]
                 if random_snippet != self.last_snippet:
                     found_snippet_not_equivalent_to_last = True
@@ -271,6 +352,27 @@ class ImageSnippetApp:
                     return feedback
         return 2
 
+    def get_average_difficulty(self, snippet_name):
+        # get the average difficulty of all ratings
+        if self.last_folder_path:
+            folder_name = os.path.basename(self.last_folder_path)
+            safe_folder_name = re.sub(r'[^\w\s-]', '', folder_name)
+            json_filename = f"{safe_folder_name}.json"
+            json_path = os.path.join("feedback", json_filename)
+
+            if os.path.exists(json_path):
+                with open(json_path, "r") as file:
+                    data = json.load(file)
+                image_feedback = next((item for item in data if snippet_name in item), None)
+                if image_feedback is not None:
+                    feedbacks = image_feedback[snippet_name]
+                    feedbacks = [feedback.get("difficulty_level") for feedback in feedbacks]
+                    feedbacks = [feedback for feedback in feedbacks if feedback is not None]
+                    feedbacks = [feedback for feedback in feedbacks if feedback != -1]
+                    feedback = sum(feedbacks) / len(feedbacks) if len(feedbacks) > 0 else 2
+                    return feedback
+        return -1
+
     def clear_frame(self, frame):
         # Check if current_snippet_frame exists and contains widgets
         if frame:
@@ -306,12 +408,7 @@ class ImageSnippetApp:
             safe_folder_name = re.sub(r'[^\w\s-]', '', folder_name)
             json_filename = f"{safe_folder_name}.json"
             json_path = os.path.join("feedback", json_filename)
-
-            feedback_data = {
-                "timestamp": datetime.now().isoformat(),
-                "difficulty_level": self.codified_difficulty_levels_dict[difficulty_level]
-            }
-
+         
             if not os.path.exists("feedback"):
                 os.makedirs("feedback")
 
@@ -322,14 +419,34 @@ class ImageSnippetApp:
                 data = []
 
             image_feedback = next((item for item in data if snippet_name in item), None)
-            if image_feedback is not None:
-                image_feedback[snippet_name].append(feedback_data)
+
+            if difficulty_level: 
+                feedback_data = {
+                    "timestamp": datetime.now().isoformat(),
+                    "difficulty_level": self.codified_difficulty_levels_dict[difficulty_level]
+                }
+
+                if image_feedback is not None:
+                    image_feedback[snippet_name].append(feedback_data)
+                else:
+                    image_feedback = {snippet_name: [feedback_data]}
+                    data.append(image_feedback)
             else:
-                image_feedback = {snippet_name: [feedback_data]}
-                data.append(image_feedback)
+                data.append({snippet_name: []})
 
             with open(json_path, "w") as file:
                 json.dump(data, file)
+    
+    def get_all_stored_feedback(self):
+        # loop all files in feedback folder:
+        feedback_data = {}
+        for filename in os.listdir("feedback"):
+            if filename.endswith(".json"):
+                with open(os.path.join("feedback", filename), "r") as file:
+                    data = json.load(file)
+                    feedback_data[filename] = data
+        return feedback_data
+
 
     # Sessions Settings Screen
     def open_session_settings(self):
@@ -390,6 +507,11 @@ class ImageSnippetApp:
             # generate the last two, that are wrapping around
             self.snippets.append([sorted_image_list[-1], sorted_image_list[0], sorted_image_list[1]])
             self.snippets.append([sorted_image_list[-2], sorted_image_list[-1], sorted_image_list[0]])
+
+        # attach each snippet to feedback json, as an empty list
+        for snippet in self.snippets:
+            snippet_name = self.name_from_snippet(snippet)
+            self.store_feedback(None, snippet_name)
 
     def name_from_snippet(self, snippet):
         return '—'.join([f'\'{image.split("/")[-1]}\'' for image in snippet])

@@ -30,8 +30,6 @@
 - if I hash filenames, could rather ethically gather data w/o much risk
 - move magic numbers into consonants
 - consider snippet class
-- skip on "Very Easy"?
-	- done, but make sure its only done when not rating last snippet lol
 
 
 - consider messing with time-until-next-snippet when things are harder/easier (but factor in which direction? xD)
@@ -41,6 +39,4 @@
 - also, bug: sometimes same snippet is chosen twice in a row
 	- automated testing would help, my friend :)
 
-
-- check that timer is killed when ending session
-- in general, timer and skipping is not working very well
+- see that under some conditions missing snippets are sought out
