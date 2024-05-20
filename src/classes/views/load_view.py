@@ -8,14 +8,17 @@ class LoadView(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.db = parent.db
+        self.selected_folder_path = None
+
         ttk.Label(self, text="Load Snippets From a Folder on Your Device").pack()
         ttk.Button(self, text="Select Folder", command=self.open_folder).pack()
-
-        # back
         ttk.Button(self, text="Back To Start", command=lambda: parent.go_to("start")).pack()
 
+    def load(self):
+        pass
 
     def load_images_from_folder(self, folder_path):
+        self.selected_folder_path = folder_path
         image_list = []
         for filename in os.listdir(folder_path):
             filepath = os.path.join(folder_path, filename)
@@ -36,8 +39,15 @@ class LoadView(ttk.Frame):
     @db_session
     def confirm_images(self):
             if self.image_list:
-
+                # MusicPiece based on folder name
+                music_piece = self.db.MusicPiece(title=self.selected_folder_path.split("/")[-1], folder_path=self.selected_folder_path)
+                snippet_images = []
                 for image in self.image_list:
-                    print(image[0], image[1])
-                    self.db.SnippetImage(path=image[1])
+                    img_obj = self.db.SnippetImage(path=image[1])
+                    snippet_images.append(img_obj)
+                
+                # create Snippet objects
+                # first: Snippets with 1 SnippetImage each
+                for img_obj in snippet_images:
+                    self.db.Snippet(snippet_images=[img_obj], music_piece=music_piece, snippet_name=img_obj.path.split("/")[-1])
                     

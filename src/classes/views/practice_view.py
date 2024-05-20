@@ -2,8 +2,14 @@ from tkinter import ttk
 from pony.orm import *
 import tkinter as tk
 
+import random
+
+from PIL import Image, ImageTk
+from tkinter import PhotoImage
+
 
 class PracticeView(ttk.Frame):
+    @db_session
     def __init__(self, parent):
         super().__init__(parent)
         ttk.Label(self, text="Practicing....").pack()
@@ -82,7 +88,51 @@ class PracticeView(ttk.Frame):
         self.main_footer_rating_frame = ttk.Frame(self.main_footer_rating_frame)
         self.main_footer_rating_frame.pack()
 
+
+    @db_session
+    def load(self):
+        self.load_snippets()
+        self.load_random_snippet()
+        self.render_current_snippet()
+
     @db_session
     def load_snippets(self):
-        # get all snippets
-        self.snippets = select(s for s in self.db.SnippetImage)[:]
+        # get last created MusicPiece
+        self.music_piece = select(m for m in self.db.MusicPiece).order_by(desc(self.db.MusicPiece.id)).first()
+        # load all snippets of that MusicPiece
+        self.snippets = select(s for s in self.db.Snippet if s.music_piece == self.music_piece)[:]
+        # for every snippet, preload the SnippetImages
+        for snippet in self.snippets:
+            snippet.snippet_images
+        print("loaded snippets", self.snippets)
+
+    @db_session
+    def load_random_snippet(self):
+        if self.snippets:
+            self.last_snippet = self.current_snippet
+            self.last_snippet_name = self.current_snippet_name
+
+            self.current_snippet = random.choice(self.snippets)
+            self.clear_snippet_renderer()
+            self.render_current_snippet()
+
+            # in 5 s, render next snippet
+            self.after(5000, self.load_random_snippet)
+
+    @db_session
+    def render_current_snippet(self, use_small_images=False):
+        images = self.current_snippet.snippet_images
+        for img_obj in images:
+            image = Image.open(img_obj.path)
+            if use_small_images:
+                image.thumbnail((100, 100))
+            tk_image = ImageTk.PhotoImage(image)
+            label = ttk.Label(self.current_snippet_label, image=tk_image)
+            label.image = tk_image
+            # put in frame
+            label.pack(side=tk.LEFT, expand=True, fill=tk.X)
+
+    @db_session
+    def clear_snippet_renderer(self):
+        for widget in self.current_snippet_label.winfo_children():
+            widget.destroy()

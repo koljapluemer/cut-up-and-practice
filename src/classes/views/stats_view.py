@@ -5,3 +5,7 @@ class StatsView(ttk.Frame):
         super().__init__(parent)
         ttk.Label(self, text="Your Statistics").pack()
         ttk.Button(self, text="Back To Start", command=lambda: parent.go_to("start")).pack()
+
+
+    def load(self):
+        pass

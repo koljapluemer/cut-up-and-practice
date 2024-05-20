@@ -20,11 +20,8 @@ class App(ThemedTk):
         self.db = Database()
         self.db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
         self.define_entities(self.db)
-        self.test_db()
-
 
         # init views
-
         self.views = {
             "start": StartView(self),
             "ready": ReadyView(self),
@@ -36,20 +33,21 @@ class App(ThemedTk):
         self.current_view = None
         self.go_to("start")
 
+        self.run()
+        
+    @db_session
+    def run(self):
         self.mainloop()
 
     @db_session
-    def test_db(self):
-        self.db.MusicPiece(title="Test Piece", folder_path="test")
-
     def go_to(self, target):
-        print(f"Going to {target}")
         # hide current view
         if self.current_view:
             self.current_view.pack_forget()
         
         # show target view
         self.current_view = self.views[target]
+        self.current_view.load()
         self.current_view.pack(fill=tk.BOTH, expand=True)
 
     def define_entities(self, db):

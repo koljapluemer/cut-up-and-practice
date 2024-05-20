@@ -8,3 +8,7 @@ class StartView(ttk.Frame):
         ttk.Button(self, text="Continue Last Session", command=lambda: parent.go_to("ready")).pack()
 
         btn_new = ttk.Button(self, text="Practice New Music Piece", command=lambda: parent.go_to("load")).pack()
+    
+    
+    def load(self):
+        pass

@@ -5,3 +5,6 @@ class ReadyView(ttk.Frame):
         super().__init__(parent)
         ttk.Label(self, text="Ready to start?").pack()
         ttk.Button(self, text="Start Session", command=lambda: parent.go_to("practice")).pack()
+
+    def load(self):
+        pass
