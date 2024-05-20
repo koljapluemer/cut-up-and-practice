@@ -8,11 +8,19 @@ from .views.practice_view import PracticeView
 from .views.stats_view import StatsView
 from .views.load_view import LoadView
 
+from pony.orm import *
+
+
 class App(ThemedTk):
     def __init__(self):
         super().__init__(theme="arc")
         self.title("Cut up and practice")
         self.geometry("700x500")
+
+        # init database
+        self.db = Database()
+        self.db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
+        self.define_entities(self.db)
 
         # init views
 
@@ -38,4 +46,29 @@ class App(ThemedTk):
         # show target view
         self.current_view = self.views[target]
         self.current_view.pack(fill=tk.BOTH, expand=True)
+
+    def define_entities(self, db):
+        class MusicPiece(db.Entity):
+            title = Required(str)
+            folder_path = Required(str)
+            snippets = Set("Snippet")
+
+        class Snippet(db.Entity):
+            music_piece = Required(MusicPiece)
+            snippet_name = Required(str)
+            snippet_images = Set("SnippetImage")
+            logs = Set("SnippetLog")
+
+        class SnippetImage(db.Entity):
+            path = Required(str)
+            snippet = Set(Snippet)
+
+        class SnippetLog(db.Entity):
+            snippet = Required(Snippet)
+            time_stamp = Required(str)
+            log_type = Required(str)
+
+        class FeedbackLog(SnippetLog):
+            feedback = Required(int)
         
+        db.generate_mapping(create_tables=True)
