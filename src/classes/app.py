@@ -72,6 +72,8 @@ class App(ThemedTk):
             t = Optional(float)
             last_seen = Optional(datetime.datetime)
 
+            prerequisite_snippets = Set("Snippet", reverse="prerequisite_snippets")
+
             def get_predicted_recall(self):
                 if self.alpha is None or self.beta is None or self.t is None:
                     return None

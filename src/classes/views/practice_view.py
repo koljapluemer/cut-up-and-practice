@@ -116,15 +116,23 @@ class PracticeView(ttk.Frame):
 
         for snippet in self.snippets:
             if snippet.get_predicted_recall() < lowest_predicted_recall:
-                lowest_predicted_recall = snippet.get_predicted_recall()
-                chosen_snippet = snippet
+                # if snippet has prerequisits (because made from more than 1 img), check that they all have predicted recall that exists and is over 0.6
+                disqualified_by_prerequisites = False
+                if len(snippet.snippet_images) > 1:
+                    for prereq in snippet.prerequisite_snippets:
+                        if prereq.get_predicted_recall() is None or prereq.get_predicted_recall() < 0.6:
+                            disqualified_by_prerequisites = True
+                            break
+                if not disqualified_by_prerequisites:
+                    lowest_predicted_recall = snippet.get_predicted_recall()
+                    chosen_snippet = snippet
 
         self.last_snippet = self.current_snippet
         self.current_snippet = chosen_snippet
         self.clear_snippet_renderer()
         self.render_current_snippet()
 
-        self.current_countdown = self.after(5000, self.load_next_snippet)
+        self.current_countdown = self.after(1000, self.load_next_snippet)
 
 
     @db_session
