@@ -19,15 +19,13 @@ class PracticeView(ttk.Frame):
         self.load_snippets()
 
 
-        # GUI Setup
         self.current_snippet = None
-        self.current_snippet_frame = None
-
         self.last_snippet = None
-
-        self.image_list = []
         self.snippets = []
+        self.current_countdown = None
 
+        # GUI Setup
+        self.current_snippet_frame = None
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -89,8 +87,9 @@ class PracticeView(ttk.Frame):
 
     @db_session
     def load(self):
+        self.cancel_countdown()
         self.load_snippets()
-        self.load_random_snippet()
+        self.load_next_snippet()
         self.render_current_snippet()
 
     @db_session
@@ -103,17 +102,38 @@ class PracticeView(ttk.Frame):
         for snippet in self.snippets:
             snippet.snippet_images
 
+
     @db_session
-    def load_random_snippet(self):
-        if self.snippets:
-            self.last_snippet = self.current_snippet
+    def load_next_snippet(self):
+        # run get_predicted_recall for all snippets
+        # lowest predicted recall is below 0.6, load that snippet!!
+        # otherwise, load a snippet where predicted recall is Null (never shown before)
+        # if all snippets have predicted recall above 60%, load a random snippet:
+        lowest_predicted_recall = 1
+        most_urgent_snippet = None
+        chosen_snippet = None
 
-            self.current_snippet = random.choice(self.snippets)
-            self.clear_snippet_renderer()
-            self.render_current_snippet()
+        for snippet in self.snippets:
+            if snippet.get_predicted_recall() is None:
+                chosen_snippet = snippet
+                break
+            elif snippet.get_predicted_recall() < lowest_predicted_recall:
+                lowest_predicted_recall = snippet.get_predicted_recall()
+                most_urgent_snippet = snippet
 
-            # in 5 s, render next snippet
-            self.after(5000, self.load_random_snippet)
+        if chosen_snippet and lowest_predicted_recall < 0.6:
+            chosen_snippet = most_urgent_snippet
+        
+        if not chosen_snippet:
+            chosen_snippet = random.choice(self.snippets)
+
+        self.last_snippet = self.current_snippet
+        self.current_snippet = chosen_snippet
+        self.clear_snippet_renderer()
+        self.render_current_snippet()
+
+        self.current_countdown = self.after(1000, self.load_next_snippet)
+
 
     @db_session
     def render_current_snippet(self, use_small_images=False):
@@ -137,3 +157,12 @@ class PracticeView(ttk.Frame):
     def set_difficulty(self, difficulty, snippet):
         # create SnippetLog
         self.db.SnippetLog(snippet=snippet, difficulty=self.codified_difficulty_levels_dict[difficulty], log_type="feedback")
+        # if "Very Easy", go to next snippet and cancel countdown
+        if difficulty == "Very Easy":
+            self.cancel_countdown()
+            self.load_next_snippet()
+
+    def cancel_countdown(self):
+        if self.current_countdown:
+            self.after_cancel(self.current_countdown)
+            self.current_countdown = None

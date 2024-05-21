@@ -12,11 +12,14 @@ import time, datetime
 
 from pony.orm import *
 
+import ebisu
+import datetime
+
 class App(ThemedTk):
     def __init__(self):
         super().__init__(theme="arc")
         self.title("Cut up and practice")
-        self.geometry("700x500")
+        self.geometry("15000x800")
 
         # init database
         self.db = Database()
@@ -63,6 +66,17 @@ class App(ThemedTk):
             snippet_name = Required(str)
             snippet_images = Set("SnippetImage")
             logs = Set("SnippetLog")
+            # ebisu
+            alpha = Optional(float)
+            beta = Optional(float)
+            t = Optional(int)
+
+            def get_predicted_recall(self):
+                if self.alpha is None or self.beta is None or self.t is None:
+                    return None
+                else:
+                    return ebisu.predictRecall(self.alpha, self.beta, self.t, datetime.datetime.now().timestamp())
+
 
         class SnippetImage(db.Entity):
             path = Required(str)
