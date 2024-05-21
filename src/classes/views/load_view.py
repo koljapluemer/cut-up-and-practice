@@ -4,6 +4,10 @@ import os
 
 from pony.orm import *
 
+
+import ebisu
+import datetime
+
 class LoadView(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -61,3 +65,8 @@ class LoadView(ttk.Frame):
                 # also, only connect direct neighbors
                 for i in range(0, len(snippet_images)-2, 3):
                     self.db.Snippet(snippet_images=[snippet_images[i], snippet_images[i+1], snippet_images[i+2]], music_piece=music_piece, snippet_name=f"{snippet_images[i].path.split('/')[-1]}, {snippet_images[i+1].path.split('/')[-1]} and {snippet_images[i+2].path.split('/')[-1]}")
+
+                # ebisu default values
+                for snippet in music_piece.snippets:
+                    snippet.alpha, snippet.beta, snippet.t = ebisu.defaultModel(10)
+                    snippet.last_seen = datetime.datetime.now()

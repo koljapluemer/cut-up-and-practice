@@ -7,6 +7,8 @@ import random
 from PIL import Image, ImageTk
 from tkinter import PhotoImage
 
+import ebisu
+import datetime
 
 class PracticeView(ttk.Frame):
     @db_session
@@ -53,7 +55,7 @@ class PracticeView(ttk.Frame):
         self.codified_difficulty_levels_dict["Just Displayed"] = -1
         self.difficulty_buttons = []
         for level in self.difficulty_levels:
-            button = ttk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.current_snippet))
+            button = ttk.Button(self.difficulty_buttons_frame, text=level, command=lambda l=level: self.save_feedback(l, self.current_snippet))
             button.pack(side=tk.LEFT, padx=5)
 
         # Footer 
@@ -76,7 +78,7 @@ class PracticeView(ttk.Frame):
         self.main_footer_rating_buttons_frame = ttk.Frame(self.main_footer_rating_frame)
 
         for level in self.difficulty_levels:
-            button = ttk.Button(self.main_footer_rating_buttons_frame, text=level, command=lambda l=level: self.set_difficulty(l, self.last_snippet))
+            button = ttk.Button(self.main_footer_rating_buttons_frame, text=level, command=lambda l=level: self.save_feedback(l, self.last_snippet))
             button.pack(side=tk.LEFT)
 
         self.main_footer_rating_buttons_frame.pack(side=tk.BOTTOM)
@@ -90,7 +92,6 @@ class PracticeView(ttk.Frame):
         self.cancel_countdown()
         self.load_snippets()
         self.load_next_snippet()
-        self.render_current_snippet()
 
     @db_session
     def load_snippets(self):
@@ -110,29 +111,20 @@ class PracticeView(ttk.Frame):
         # otherwise, load a snippet where predicted recall is Null (never shown before)
         # if all snippets have predicted recall above 60%, load a random snippet:
         lowest_predicted_recall = 1
-        most_urgent_snippet = None
         chosen_snippet = None
+        unseen_snippets = []
 
         for snippet in self.snippets:
-            if snippet.get_predicted_recall() is None:
-                chosen_snippet = snippet
-                break
-            elif snippet.get_predicted_recall() < lowest_predicted_recall:
+            if snippet.get_predicted_recall() < lowest_predicted_recall:
                 lowest_predicted_recall = snippet.get_predicted_recall()
-                most_urgent_snippet = snippet
-
-        if chosen_snippet and lowest_predicted_recall < 0.6:
-            chosen_snippet = most_urgent_snippet
-        
-        if not chosen_snippet:
-            chosen_snippet = random.choice(self.snippets)
+                chosen_snippet = snippet
 
         self.last_snippet = self.current_snippet
         self.current_snippet = chosen_snippet
         self.clear_snippet_renderer()
         self.render_current_snippet()
 
-        self.current_countdown = self.after(1000, self.load_next_snippet)
+        self.current_countdown = self.after(5000, self.load_next_snippet)
 
 
     @db_session
@@ -154,9 +146,19 @@ class PracticeView(ttk.Frame):
             widget.destroy()
 
     @db_session
-    def set_difficulty(self, difficulty, snippet):
+    def save_feedback(self, difficulty, snippet):
         # create SnippetLog
         self.db.SnippetLog(snippet=snippet, difficulty=self.codified_difficulty_levels_dict[difficulty], log_type="feedback")
+
+        a = snippet.alpha
+        b = snippet.beta
+        t = snippet.t
+        max_score = 4
+        score = self.codified_difficulty_levels_dict[difficulty]
+        time_elapsed = datetime.datetime.now() - snippet.last_seen
+        time_elapsed_in_seconds = time_elapsed.total_seconds()
+        prior_model = (a, b, t)
+        snippet.alpha, snippet.beta, snippet.t = ebisu.updateRecall(prior_model, score, max_score, time_elapsed_in_seconds)
         # if "Very Easy", go to next snippet and cancel countdown
         if difficulty == "Very Easy":
             self.cancel_countdown()

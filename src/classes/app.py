@@ -69,13 +69,17 @@ class App(ThemedTk):
             # ebisu
             alpha = Optional(float)
             beta = Optional(float)
-            t = Optional(int)
+            t = Optional(float)
+            last_seen = Optional(datetime.datetime)
 
             def get_predicted_recall(self):
                 if self.alpha is None or self.beta is None or self.t is None:
                     return None
                 else:
-                    return ebisu.predictRecall(self.alpha, self.beta, self.t, datetime.datetime.now().timestamp())
+                    prior_model = (self.alpha, self.beta, self.t)
+                    time_elapsed = datetime.datetime.now() - self.last_seen
+                    time_elapsed_in_seconds = time_elapsed.total_seconds()
+                    return ebisu.predictRecall(prior_model, time_elapsed_in_seconds, exact=True)
 
 
         class SnippetImage(db.Entity):
