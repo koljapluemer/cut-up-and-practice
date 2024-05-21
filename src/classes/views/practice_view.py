@@ -83,8 +83,8 @@ class PracticeView(ttk.Frame):
 
         self.main_footer_rating_buttons_frame.pack(side=tk.BOTTOM)
 
-        self.main_footer_rating_frame = ttk.Frame(self.main_footer_rating_frame)
-        self.main_footer_rating_frame.pack()
+        self.last_snippet_label = ttk.Frame(self.main_footer_rating_frame)
+        self.last_snippet_label.pack()
 
 
     @db_session
@@ -127,23 +127,27 @@ class PracticeView(ttk.Frame):
                     lowest_predicted_recall = snippet.get_predicted_recall()
                     chosen_snippet = snippet
 
+        # render last snippet
+        if self.last_snippet:
+            self.clear_snippet_renderer()
+            self.render_snippet(self.last_snippet_label, self.last_snippet, use_small_images=True)
         self.last_snippet = self.current_snippet
         self.current_snippet = chosen_snippet
-        self.clear_snippet_renderer()
-        self.render_current_snippet()
+        self.render_snippet(self.current_snippet_label, self.current_snippet)
+    
 
         self.current_countdown = self.after(1000, self.load_next_snippet)
 
 
     @db_session
-    def render_current_snippet(self, use_small_images=False):
-        images = self.current_snippet.snippet_images
+    def render_snippet(self, target, snippet, use_small_images=False):
+        images = snippet.snippet_images
         for img_obj in images:
             image = Image.open(img_obj.path)
             if use_small_images:
                 image.thumbnail((100, 100))
             tk_image = ImageTk.PhotoImage(image)
-            label = ttk.Label(self.current_snippet_label, image=tk_image)
+            label = ttk.Label(target, image=tk_image)
             label.image = tk_image
             # put in frame
             label.pack(side=tk.LEFT, expand=True, fill=tk.X)
@@ -151,6 +155,8 @@ class PracticeView(ttk.Frame):
     @db_session
     def clear_snippet_renderer(self):
         for widget in self.current_snippet_label.winfo_children():
+            widget.destroy()
+        for widget in self.last_snippet_label.winfo_children():
             widget.destroy()
 
     @db_session
