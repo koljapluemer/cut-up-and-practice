@@ -15,30 +15,9 @@
 
 - warning when no snippets loaded;show snippets when loaded
 
-- definitely would be more pleasant if we establish a min amount for all snippets involved, then raise the bar
-	- also the science ofc would appreciate an A/B test:
-		1. equal-opportunity SR for all snippets
-		2. threshold to cross for parts of snippets before grouped snippets legal
-		3. completely random
-		- and then measure motivation as well as how fast avg climbs
-		- ...but at that point, need new song
-- also establish basic trailing avg instead of counting all the first 100 failed attempts for a snippet which will keep it repeated forever
-- other, sneaky A-B test idea:
-	1. establish one condition where we optimize for some failure rate, picking harder or easier to keep (another arbitrary) failure rate consistent
-	2. establish one where you go full SR, least likely success gets repeated first
-	3. randomly pick them for a session, then go for either just session-length tracking or maybe a moti-question (or threat/challenge) question on occasion
 - if I hash filenames, could rather ethically gather data w/o much risk
 - move magic numbers into consonants
-- consider snippet class
-
-
 - consider messing with time-until-next-snippet when things are harder/easier (but factor in which direction? xD)
-- do away with the hack of 3 by-difficulty rated items and then randoms. just guess their likely difficulty and sort all, or something
-	- also, just ebisu them all :)
 
-- also, bug: sometimes same snippet is chosen twice in a row
-	- automated testing would help, my friend :)
 
-- see that under some conditions missing snippets are sought out
-
-- establish classes. this is getting out of hand with the nested dicts.
+- proper state mgnmt for each screen

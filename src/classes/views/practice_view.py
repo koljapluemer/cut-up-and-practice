@@ -124,17 +124,19 @@ class PracticeView(ttk.Frame):
                             disqualified_by_prerequisites = True
                             break
                 if not disqualified_by_prerequisites:
-                    lowest_predicted_recall = snippet.get_predicted_recall()
-                    chosen_snippet = snippet
+                    # also exclude if same as last snippet
+                    if snippet != self.last_snippet:
+                        lowest_predicted_recall = snippet.get_predicted_recall()
+                        chosen_snippet = snippet
 
         # render last snippet
+        self.clear_snippet_renderer()
         if self.last_snippet:
-            self.clear_snippet_renderer()
             self.render_snippet(self.last_snippet_label, self.last_snippet, use_small_images=True)
+
         self.last_snippet = self.current_snippet
         self.current_snippet = chosen_snippet
         self.render_snippet(self.current_snippet_label, self.current_snippet)
-    
 
         self.current_countdown = self.after(1000, self.load_next_snippet)
 
