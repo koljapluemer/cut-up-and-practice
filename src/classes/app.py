@@ -15,8 +15,15 @@ from pony.orm import *
 import ebisu
 import datetime
 
+from enum import Enum
+
 class App(ThemedTk):
     def __init__(self):
+
+
+        self.states = Enum("States", ["NO SONG", "SONG LOADED", "SONG SAVED"]
+        self.currentState = self.states.NO_SONG
+
         super().__init__(theme="arc")
         self.title("Cut up and practice")
         self.geometry("15000x800")
@@ -93,5 +100,8 @@ class App(ThemedTk):
             timestamp = Required(datetime.datetime, default=datetime.datetime.now)
             log_type = Required(str)
             difficulty = Optional(int)
+
+        class GlobalSettings(db.Entity):
+            last_folder = Optional(str)
         
         db.generate_mapping(create_tables=True)
