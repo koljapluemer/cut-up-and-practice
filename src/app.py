@@ -16,14 +16,9 @@ from enum import Enum
 
 import os
 
-import sv_ttk
-
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-
-        # s = ttk.Style()
-        # s.configure('Primary.TButton', font=('Helvetica', 14))
 
         self.states = Enum("States", ["NO_CURRENT_MUSIC_PIECE",  "CURRENT_MUSIC_PIECE_EXISTS"])
         self.current_state = self.states.NO_CURRENT_MUSIC_PIECE
@@ -62,7 +57,6 @@ class App(tk.Tk):
         
     @db_session
     def run(self):
-        sv_ttk.set_theme("light")
         self.mainloop()
 
     @db_session
@@ -126,6 +120,5 @@ class App(tk.Tk):
 
 
 if __name__ == "__main__":
-
     app = App()
 

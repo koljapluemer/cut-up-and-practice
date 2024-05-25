@@ -7,5 +7,4 @@ pony==0.7.17
 pyinstaller==6.6.0
 pyinstaller-hooks-contrib==2024.6
 scipy==1.13.0
-sv-ttk==2.6.0
 ttkthemes==3.2.2

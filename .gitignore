@@ -9,7 +9,7 @@ assets/example/
 assets/example/*
 feedback/song-testing.json
 feedback/song-2.json
-
+database.sqlite-journal
 database.sqlite
 src/classes/database.sqlite
 
