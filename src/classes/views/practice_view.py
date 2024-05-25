@@ -22,6 +22,7 @@ class PracticeView(ttk.Frame):
         self.db = parent.db
         self.load_snippets()
 
+        parent.current_state = parent.states.CURRENT_MUSIC_PIECE_EXISTS
 
         self.current_snippet = None
         self.last_snippet = None
@@ -97,8 +98,8 @@ class PracticeView(ttk.Frame):
 
     @db_session
     def load_snippets(self):
-        # get last created MusicPiece
-        self.music_piece = select(m for m in self.db.MusicPiece).order_by(desc(self.db.MusicPiece.id)).first()
+        # get current music piece from global settings
+        self.music_piece = self.db.GlobalSettings.get().current_music_piece
         # load all snippets of that MusicPiece
         self.snippets = select(s for s in self.db.Snippet if s.music_piece == self.music_piece)[:]
         # for every snippet, preload the SnippetImages

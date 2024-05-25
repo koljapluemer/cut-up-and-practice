@@ -17,12 +17,14 @@ import datetime
 
 from enum import Enum
 
+import os
+
 class App(ThemedTk):
     def __init__(self):
 
 
-        self.states = Enum("States", ["NO SONG", "SONG LOADED", "SONG SAVED"]
-        self.currentState = self.states.NO_SONG
+        self.states = Enum("States", ["NO_CURRENT_MUSIC_PIECE",  "CURRENT_MUSIC_PIECE_EXISTS"])
+        self.current_state = self.states.NO_CURRENT_MUSIC_PIECE
 
         super().__init__(theme="arc")
         self.title("Cut up and practice")
@@ -32,6 +34,8 @@ class App(ThemedTk):
         self.db = Database()
         self.db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
         self.define_entities(self.db)
+
+        self.check_state_and_settings()
 
         # init views
         self.views = {
@@ -46,6 +50,16 @@ class App(ThemedTk):
         self.go_to("start")
 
         self.run()
+
+    @db_session
+    def check_state_and_settings(self):
+        # make GlobalSettings a cheap singleton: if there is no object, create one
+        if len(self.db.GlobalSettings.select()) == 0:
+            self.db.GlobalSettings(interval=1)
+        # if we have last_folder set and the folder exist, set state to last song exists
+        settings = self.db.GlobalSettings.get()
+        if settings.current_music_piece:
+            self.current_state = self.states.CURRENT_MUSIC_PIECE_EXISTS
         
     @db_session
     def run(self):
@@ -67,6 +81,9 @@ class App(ThemedTk):
             title = Required(str)
             folder_path = Required(str)
             snippets = Set("Snippet")
+    
+            useless_setting_prop = Optional("GlobalSettings")
+
 
         class Snippet(db.Entity):
             music_piece = Required(MusicPiece)
@@ -102,6 +119,7 @@ class App(ThemedTk):
             difficulty = Optional(int)
 
         class GlobalSettings(db.Entity):
-            last_folder = Optional(str)
+            current_music_piece = Optional("MusicPiece")
+            interval = Required(int)
         
         db.generate_mapping(create_tables=True)
