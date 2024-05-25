@@ -12,6 +12,16 @@ This project allows you to practice music by "cutting up" a piece of music into 
 
 ## How It Works
 
+1. Find a piece of music that you want to practice (e.g. sheet music)
+2. "Cut it" into small pieces using a screenshot tool of your choice
+3. Put all screenshots into a folder
+4. Start *Cut Up and Practice*, load up the folder and auto-generate "snippets"
+5. Practice!
+
+*Also see demo video below:*
+
+![Cut Up and Practice Demo Use Case](doc/img/demo_video.mp4)
+
 ## Contributing & Running Locally
 
 *Release files that allow you to run this app with one click are WIP. For now, it has to be installed manually.*
