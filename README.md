@@ -20,7 +20,8 @@ This project allows you to practice music by "cutting up" a piece of music into 
 
 *Also see demo video below:*
 
-![Cut Up and Practice Demo Use Case](doc/img/demo_video.mp4)
+https://github.com/koljapluemer/cut-up-and-practice/assets/37226572/099ce779-7175-4404-b894-24d57f69b544
+
 
 ## Contributing & Running Locally
 
