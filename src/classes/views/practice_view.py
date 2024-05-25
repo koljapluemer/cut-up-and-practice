@@ -10,8 +10,6 @@ from tkinter import PhotoImage
 import ebisu
 import datetime
 
-NEXT_SNIPPET_AFTER_SECONDS = 1
-
 class PracticeView(ttk.Frame):
     @db_session
     def __init__(self, parent):
@@ -141,7 +139,8 @@ class PracticeView(ttk.Frame):
         self.current_snippet = chosen_snippet
         self.render_snippet(self.current_snippet_label, self.current_snippet)
 
-        self.current_countdown = self.after(NEXT_SNIPPET_AFTER_SECONDS * 1000, self.load_next_snippet)
+        interval = self.db.GlobalSettings.get().interval
+        self.current_countdown = self.after(interval * 1000, self.load_next_snippet)
 
 
     @db_session

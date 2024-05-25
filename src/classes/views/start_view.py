@@ -20,6 +20,25 @@ class StartView(ttk.Frame):
         for music_piece in parent.db.MusicPiece.select():
             id = music_piece.id
             ttk.Button(self, text=music_piece.title, command=lambda: self.go_to_practice_of_piece(id)).pack()
+
+        ttk.Separator(self, orient="horizontal").pack(fill="x")
+        # Settings Section (for now, only the interval setting from GlobalSettings)
+        ttk.Label(self, text="Settings:").pack()
+        settings = self.db.GlobalSettings.get()
+        # allow changing the interval!!!! xD
+        self.interval_label = ttk.Label(self, text=f"Interval for each snippet:")
+        self.interval_label.pack()
+        self.interval_entry = ttk.Entry(self)
+        self.interval_entry.insert(0, settings.interval)
+        self.interval_entry.pack()
+        ttk.Button(self, text="Save Settings", command=self.save_settings).pack()
+
+    @db_session
+    def save_settings(self):
+        settings = self.db.GlobalSettings.get()
+        settings.interval = int(self.interval_entry.get())
+        commit()
+
     
     
     def load(self):
