@@ -14,8 +14,8 @@ class PracticeView(ttk.Frame):
     @db_session
     def __init__(self, parent):
         super().__init__(parent)
-        ttk.Label(self, text="Practicing....").pack()
-        ttk.Button(self, text="End Session", command=lambda: parent.go_to("start")).pack()
+        ttk.Label(self, text="Practicing....").pack(padx=5, pady=5)
+        ttk.Button(self, text="End Session", command=lambda: parent.go_to("start")).pack(padx=5, pady=5)
 
         self.db = parent.db
         self.load_snippets()
@@ -38,16 +38,16 @@ class PracticeView(ttk.Frame):
         self.main_practice_frame.grid(row=0, column=0, sticky="ewns")
 
         self.main_heading = ttk.Label(self.main_practice_frame, text="Practice:")
-        self.main_heading.pack()
+        self.main_heading.pack(padx=5, pady=5)
 
         self.current_snippet_frame = ttk.Frame(self.main_practice_frame)
         self.current_snippet_frame.pack(fill=tk.BOTH, expand=True)
 
         self.current_snippet_label = ttk.Label(self.current_snippet_frame)
-        self.current_snippet_label.pack()
+        self.current_snippet_label.pack(padx=5, pady=5)
 
         self.difficulty_buttons_frame = ttk.Frame(self.main_practice_frame)
-        self.difficulty_buttons_frame.pack()
+        self.difficulty_buttons_frame.pack(padx=5, pady=5)
 
         self.difficulty_levels = ["Very Hard", "Hard", "Medium", "Easy", "Very Easy"]
         self.codified_difficulty_levels_dict = {level: i for i, level in enumerate(self.difficulty_levels)}
@@ -72,7 +72,7 @@ class PracticeView(ttk.Frame):
         self.main_footer_rating_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         self.main_footer_rating_label = ttk.Label(self.main_footer_rating_frame, text="Rate the difficulty of the last snippet:")
-        self.main_footer_rating_label.pack()
+        self.main_footer_rating_label.pack(padx=5, pady=5)
 
         self.main_footer_rating_buttons_frame = ttk.Frame(self.main_footer_rating_frame)
 
@@ -83,7 +83,7 @@ class PracticeView(ttk.Frame):
         self.main_footer_rating_buttons_frame.pack(side=tk.BOTTOM)
 
         self.last_snippet_label = ttk.Frame(self.main_footer_rating_frame)
-        self.last_snippet_label.pack()
+        self.last_snippet_label.pack(padx=5, pady=5)
 
 
     @db_session

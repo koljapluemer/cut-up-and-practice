@@ -30,32 +30,32 @@ class LoadView(ttk.Frame):
         for widget in self.winfo_children():
             widget.destroy()
 
-        ttk.Label(self, text="Load Snippets From a Folder on Your Device").pack()
+        ttk.Label(self, text="Load Snippets From a Folder on Your Device").pack(padx=5, pady=5)
         
         if self.current_local_state == self.local_states.NO_FOLDER_SELECTED:
-            ttk.Button(self, text="Select Folder", command=self.open_folder).pack()
+            ttk.Button(self, text="Select Folder", command=self.open_folder).pack(padx=5, pady=5)
 
         if self.current_local_state == self.local_states.FOLDER_SELECTED:
-            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
-            ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack()
-            ttk.Label(self, text=f"Found {len(self.image_list)} images.").pack()
-            ttk.Button(self, text="Create Snippets", command=self.confirm_images).pack()
-            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
+            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack(padx=5, pady=5)
+            ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack(padx=5, pady=5)
+            ttk.Label(self, text=f"Found {len(self.image_list)} images.").pack(padx=5, pady=5)
+            ttk.Button(self, text="Create Snippets", command=self.confirm_images).pack(padx=5, pady=5)
+            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack(padx=5, pady=5)
 
         if self.current_local_state == self.local_states.FOLDER_SELECTED_NO_IMAGES:
-            ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack()
-            ttk.Label(self, text="No images found in folder").pack()
-            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
+            ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack(padx=5, pady=5)
+            ttk.Label(self, text="No images found in folder").pack(padx=5, pady=5)
+            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack(padx=5, pady=5)
 
         if self.current_local_state == self.local_states.SNIPPETS_LOADED:
-            ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack()
-            ttk.Label(self, text="Snippets created :)").pack()
-            ttk.Button(self, text="Start Practice", command=self.start_practice).pack()
+            ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack(padx=5, pady=5)
+            ttk.Label(self, text="Snippets created :)").pack(padx=5, pady=5)
+            ttk.Button(self, text="Start Practice", command=self.start_practice).pack(padx=5, pady=5)
             # allow selecting another folder
-            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
+            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack(padx=5, pady=5)
 
         ttk.Separator(self, orient="horizontal").pack(fill="x")
-        ttk.Button(self, text="Back To Start", command=lambda: self.parent.go_to("start")).pack()
+        ttk.Button(self, text="Back To Start", command=lambda: self.parent.go_to("start")).pack(padx=5, pady=5)
         
 
     def load_images_from_folder(self, folder_path):
