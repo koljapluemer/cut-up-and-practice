@@ -34,14 +34,19 @@ class LoadView(ttk.Frame):
         
         if self.current_local_state == self.local_states.NO_FOLDER_SELECTED:
             ttk.Button(self, text="Select Folder", command=self.open_folder).pack()
+
         if self.current_local_state == self.local_states.FOLDER_SELECTED:
+            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
             ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack()
             ttk.Label(self, text=f"Found {len(self.image_list)} images.").pack()
             ttk.Button(self, text="Create Snippets", command=self.confirm_images).pack()
+            ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
+
         if self.current_local_state == self.local_states.FOLDER_SELECTED_NO_IMAGES:
             ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack()
             ttk.Label(self, text="No images found in folder").pack()
             ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
+
         if self.current_local_state == self.local_states.SNIPPETS_LOADED:
             ttk.Label(self, text=f"Selected Folder: {self.selected_folder_path}").pack()
             ttk.Label(self, text="Snippets created :)").pack()
@@ -49,7 +54,8 @@ class LoadView(ttk.Frame):
             # allow selecting another folder
             ttk.Button(self, text="Select Another Folder", command=self.open_folder).pack()
 
-        ttk.Button(self, text="Back To Start", command=lambda: parent.go_to("start")).pack()
+        ttk.Separator(self, orient="horizontal").pack(fill="x")
+        ttk.Button(self, text="Back To Start", command=lambda: self.parent.go_to("start")).pack()
         
 
     def load_images_from_folder(self, folder_path):
@@ -120,4 +126,3 @@ class LoadView(ttk.Frame):
         settings = self.db.GlobalSettings.get()
         settings.current_music_piece = self.music_piece
         self.parent.go_to("practice")
-        self.parent.current_view.load()

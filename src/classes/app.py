@@ -3,9 +3,7 @@ from ttkthemes import ThemedTk
 import tkinter as tk
 
 from .views.start_view import StartView
-from .views.ready_view import ReadyView
 from .views.practice_view import PracticeView
-from .views.stats_view import StatsView
 from .views.load_view import LoadView
 
 import time, datetime
@@ -40,9 +38,7 @@ class App(ThemedTk):
         # init views
         self.views = {
             "start": StartView(self),
-            "ready": ReadyView(self),
             "practice": PracticeView(self),
-            "stats": StatsView(self),
             "load": LoadView(self),
         }
 
