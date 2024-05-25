@@ -1,10 +1,9 @@
 from tkinter import ttk  # Normal Tkinter.* widgets are not themed!
-from ttkthemes import ThemedTk
 import tkinter as tk
 
-from .views.start_view import StartView
-from .views.practice_view import PracticeView
-from .views.load_view import LoadView
+from views.start_view import StartView
+from views.practice_view import PracticeView
+from views.load_view import LoadView
 
 import time, datetime
 
@@ -17,14 +16,15 @@ from enum import Enum
 
 import os
 
-class App(ThemedTk):
-    def __init__(self):
+import sv_ttk
 
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
 
         self.states = Enum("States", ["NO_CURRENT_MUSIC_PIECE",  "CURRENT_MUSIC_PIECE_EXISTS"])
         self.current_state = self.states.NO_CURRENT_MUSIC_PIECE
 
-        super().__init__(theme="arc")
         self.title("Cut up and practice")
         self.geometry("15000x800")
 
@@ -59,6 +59,7 @@ class App(ThemedTk):
         
     @db_session
     def run(self):
+        sv_ttk.set_theme("light")
         self.mainloop()
 
     @db_session
@@ -119,3 +120,8 @@ class App(ThemedTk):
             interval = Required(int)
         
         db.generate_mapping(create_tables=True)
+
+
+if __name__ == "__main__":
+    app = App()
+
