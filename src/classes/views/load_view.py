@@ -119,6 +119,8 @@ class LoadView(ttk.Frame):
                 snippet.last_seen = datetime.datetime.now()
 
             self.current_local_state = self.local_states.SNIPPETS_LOADED
+            self.parent.current_state = self.parent.states.CURRENT_MUSIC_PIECE_EXISTS
+
             self.reload()
 
     @db_session

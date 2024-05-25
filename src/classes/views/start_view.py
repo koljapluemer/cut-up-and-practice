@@ -9,19 +9,31 @@ class StartView(ttk.Frame):
         self.db = parent.db
         self.parent = parent
 
+    @db_session
+    def save_settings(self):
+        settings = self.db.GlobalSettings.get()
+        settings.interval = int(self.interval_entry.get())
+        commit()
+    
+    def load(self):
+        # delete all widgets
+        for widget in self.winfo_children():
+            widget.destroy()
         # only if state.CURRENT_MUSIC_PIECE_EXISTS
-        if parent.current_state == parent.states.CURRENT_MUSIC_PIECE_EXISTS:
-            ttk.Button(self, text="Continue Last Session", command=lambda: parent.go_to("practice")).pack()
+        if self.parent.current_state == self.parent.states.CURRENT_MUSIC_PIECE_EXISTS:
+            ttk.Button(self, text="Continue Last Session", command=lambda: self.parent.go_to("practice")).pack()
 
-        btn_new = ttk.Button(self, text="Practice New Music Piece", command=lambda: parent.go_to("load")).pack()
+        btn_new = ttk.Button(self, text="Practice New Music Piece", command=lambda: self.parent.go_to("load")).pack()
         ttk.Separator(self, orient="horizontal").pack(fill="x")
         # make button for every music piece in the database
-        ttk.Label(self, text="Continue with a previous piece:").pack()
-        for music_piece in parent.db.MusicPiece.select():
-            id = music_piece.id
-            ttk.Button(self, text=music_piece.title, command=lambda: self.go_to_practice_of_piece(id)).pack()
+        if self.parent.current_state == self.parent.states.CURRENT_MUSIC_PIECE_EXISTS:
 
-        ttk.Separator(self, orient="horizontal").pack(fill="x")
+            ttk.Label(self, text="Continue with a previous piece:").pack()
+            for music_piece in self.parent.db.MusicPiece.select():
+                id = music_piece.id
+                ttk.Button(self, text=music_piece.title, command=lambda: self.go_to_practice_of_piece(id)).pack()
+
+            ttk.Separator(self, orient="horizontal").pack(fill="x")
         # Settings Section (for now, only the interval setting from GlobalSettings)
         ttk.Label(self, text="Settings:").pack()
         settings = self.db.GlobalSettings.get()
@@ -32,17 +44,6 @@ class StartView(ttk.Frame):
         self.interval_entry.insert(0, settings.interval)
         self.interval_entry.pack()
         ttk.Button(self, text="Save Settings", command=self.save_settings).pack()
-
-    @db_session
-    def save_settings(self):
-        settings = self.db.GlobalSettings.get()
-        settings.interval = int(self.interval_entry.get())
-        commit()
-
-    
-    
-    def load(self):
-        pass
 
     @db_session
     def go_to_practice_of_piece(self, music_piece_id):

@@ -20,8 +20,6 @@ class PracticeView(ttk.Frame):
         self.db = parent.db
         self.load_snippets()
 
-        parent.current_state = parent.states.CURRENT_MUSIC_PIECE_EXISTS
-
         self.current_snippet = None
         self.last_snippet = None
         self.snippets = []
