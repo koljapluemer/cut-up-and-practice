@@ -51,7 +51,7 @@ class App(ThemedTk):
     def check_state_and_settings(self):
         # make GlobalSettings a cheap singleton: if there is no object, create one
         if len(self.db.GlobalSettings.select()) == 0:
-            self.db.GlobalSettings(interval=1)
+            self.db.GlobalSettings(interval=45)
         # if we have last_folder set and the folder exist, set state to last song exists
         settings = self.db.GlobalSettings.get()
         if settings.current_music_piece:
