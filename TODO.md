@@ -13,11 +13,6 @@
 - basic README
 - possibly demo video
 
-- warning when no snippets loaded;show snippets when loaded
-
 - if I hash filenames, could rather ethically gather data w/o much risk
-- move magic numbers into consonants
 - consider messing with time-until-next-snippet when things are harder/easier (but factor in which direction? xD)
 
-
-- proper state mgnmt for each screen

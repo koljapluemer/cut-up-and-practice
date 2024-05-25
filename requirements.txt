@@ -1,6 +1,11 @@
 altgraph==0.17.4
+ebisu==2.1.0
+numpy==1.26.4
 packaging==24.0
 pillow==10.3.0
+pony==0.7.17
 pyinstaller==6.6.0
 pyinstaller-hooks-contrib==2024.6
+scipy==1.13.0
 TKinterModernThemes==1.10.2
+ttkthemes==3.2.2

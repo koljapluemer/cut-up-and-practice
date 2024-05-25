@@ -10,6 +10,9 @@ assets/example/*
 feedback/song-testing.json
 feedback/song-2.json
 
+database.sqlite
+src/classes/database.sqlite
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
